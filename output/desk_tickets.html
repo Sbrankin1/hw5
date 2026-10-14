@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs · Desk tickets — expected vs. actual</title>
+<style>
+  :root {
+    --yale: #00356b; --yale-soft: #e8eef6; --ink: #1c2430; --muted: #5b6573;
+    --line: #d9dee6; --bg: #f6f8fb; --card: #ffffff;
+    --ok: #1f7a46; --ok-soft: #e6f4ec; --warn: #9a5b00; --warn-soft: #fdf3e2;
+    --bad: #a3242c; --bad-soft: #fbe9ea; --blank: #fafbfc;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         color: var(--ink); background: var(--bg); }
+  header { background: var(--yale); color: #fff; padding: 22px 32px 0; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: .2px; }
+  header p { margin: 4px 0 16px; color: #c9d6e6; font-size: 14px; }
+  .meta { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: #c9d6e6; margin-bottom: 14px; }
+  .meta b { color: #fff; font-weight: 600; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav button { appearance: none; border: 0; background: transparent; color: #c9d6e6; font: inherit; font-weight: 600;
+               padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; }
+  nav button:hover { color: #fff; background: rgba(255,255,255,.08); }
+  nav button[aria-selected="true"] { background: var(--bg); color: var(--yale); }
+  nav button .tag { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 600; padding: 1px 7px;
+                    border-radius: 99px; background: rgba(255,255,255,.15); color: inherit; }
+  nav button[aria-selected="true"] .tag { background: var(--yale-soft); }
+  main { max-width: 1080px; margin: 0 auto; padding: 26px 32px 60px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  h2 { font-size: 20px; margin: 0 0 4px; }
+  h3 { font-size: 15px; text-transform: uppercase; letter-spacing: .6px; color: var(--yale); margin: 30px 0 10px; }
+  h4 { font-size: 15px; margin: 18px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .fact { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .fact .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .fact .v { font-size: 17px; font-weight: 650; }
+  .fact .v.bad { color: var(--bad); } .fact .v.ok { color: var(--ok); } .fact .v.warn { color: var(--warn); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line);
+          border-radius: 10px; overflow: hidden; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--yale-soft); color: var(--yale); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: #eef1f5; padding: 1px 5px; border-radius: 4px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .pill.info { background: var(--yale-soft); color: var(--yale); }
+  .callout { border-left: 4px solid var(--warn); background: var(--warn-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+  .callout.blue { border-color: var(--yale); background: var(--yale-soft); }
+  ol.steps { margin: 0; padding-left: 22px; } ol.steps li { margin: 6px 0; }
+  .who { font-weight: 650; color: var(--yale); }
+  ul.check { list-style: none; padding: 0; margin: 0; } ul.check li { padding: 4px 0 4px 26px; position: relative; }
+  ul.check li::before { content: "✓"; position: absolute; left: 4px; color: var(--ok); font-weight: 700; }
+  ul.check.red li::before { content: "✗"; color: var(--bad); }
+  .quote { font-style: italic; color: #33404f; background: var(--blank); border: 1px dashed var(--line); padding: 12px 16px; border-radius: 8px; }
+  .actual { border: 2px dashed #b7c2d1; background: var(--blank); border-radius: 12px; padding: 18px 20px; }
+  .actual h3 { margin-top: 0; color: var(--muted); }
+  .actual td.blank { color: #a5afbd; font-style: italic; }
+  .notes { min-height: 110px; border: 1px solid var(--line); border-radius: 8px; background: #fff; margin-top: 12px; padding: 10px 12px; color: #a5afbd; font-style: italic; }
+  .empty { text-align: center; padding: 70px 20px; color: var(--muted); border: 2px dashed #b7c2d1; border-radius: 12px; background: var(--blank); }
+  .empty h2 { color: var(--ink); }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 40px; }
+
+  .actual.filled { border-style: solid; border-color: #9fb3c8; background: #fff; }
+  .actual.filled h4 { color: var(--yale); }
+  .src { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+  ol.convo { list-style: none; padding: 0; margin: 0; }
+  ol.convo li { padding: 9px 12px; border-left: 3px solid #d9dee6; margin: 6px 0; background: #fafbfc; border-radius: 0 8px 8px 0; }
+  ol.convo li.run-mark { background: var(--yale-soft); border-left-color: var(--yale); font-weight: 600; color: var(--yale); }
+  ol.convo li.human { background: var(--ok-soft); border-left-color: var(--ok); }
+  .said { margin-top: 4px; color: #33404f; font-size: 14px; }
+  .pb { margin-top: 6px; color: #5b3aa6; font-weight: 600; font-size: 14px; }
+  .tool-sum { line-height: 1.9; }
+  table.tools td { font-size: 12.5px; }
+  table.tools tr.refused td { background: var(--bad-soft); }
+  details summary { cursor: pointer; color: var(--yale); font-weight: 600; margin: 6px 0; }
+  .draft { border: 1px solid #f0d77a; background: #fffbea; border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
+  .draft-head { font-size: 13px; color: var(--muted); }
+  .draft pre { white-space: pre-wrap; font-family: inherit; margin: 6px 0 0; }
+  .card.reflect p { margin: 0 0 10px; font-size: 15.5px; line-height: 1.65; }
+  .card.reflect p:last-child { margin-bottom: 0; }
+  @media print { nav, header .meta { display: none; } section.tab { display: block !important; page-break-after: always; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Campus Customs · Operations desk — ticket expectations</h1>
+  <p>What the team (Optimus Prime, Ratchet, Megatron, Ironhide, Bumblebee) should do on each open ticket, written before the run.</p>
+  <div class="meta">
+    <span>Shop today <b>2026-08-31</b> (<code style="background:rgba(255,255,255,.15);color:#fff">desk.date_today</code>)</span>
+    <span>Cash at start <b>$3,400.00</b> (checking)</span>
+    <span>Database <b>data/campus_customs_new.db</b> (reset from campus_customs.db)</span>
+    <span>Model <b>gpt-5.6-luna</b> via Portkey</span>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-tab="t101" aria-selected="true">101 · Bulldog tee <span class="tag">customer order</span></button>
+    <button role="tab" data-tab="t102" aria-selected="false">102 · Rent due <span class="tag">rent notice</span></button>
+    <button role="tab" data-tab="t103" aria-selected="false">103 · Bulk hoodies <span class="tag">price override</span></button>
+    <button role="tab" data-tab="cash" aria-selected="false">Cash</button>
+    <button role="tab" data-tab="reflections" aria-selected="false">Reflections</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ═════════════════════════════ 101 ═════════════════════════════ -->
+<section class="tab active" id="t101" role="tabpanel">
+  <h2>Ticket 101 · Bulldog tee for Tauhid Zaman</h2>
+  <p class="sub">Customer order · opened 2026-08-31 09:15 · "Needs a tee in size S."</p>
+
+  <h3>Rundown</h3>
+  <div class="card">
+    <p style="margin-top:0">A student, <b>Tauhid Zaman</b>, wants <b>one Classic Bulldog Tee (CC-TEE-WHITE) in size S</b>. Size S is <b>sold out</b>, so it has to be restocked. The only apparel vendor, <b>Bulldog Print Co</b>, won't ship while the shop owes it <b>$840</b> on invoice #501, which is <b>3 days overdue</b>. The ticket links straight to that invoice.</p>
+    <p style="margin-bottom:0">So the order is: <b>Megatron clears the overdue balance → confirm it's paid → Ratchet restocks one tee in size S and logs it → Bumblebee tells Tauhid when it will be with him.</b> That date is shop today plus the vendor's 5-day lead time. It is <b>never "today"</b>.</p>
+  </div>
+  <div class="grid">
+    <div class="fact"><div class="k">On hand (S)</div><div class="v bad">0</div></div>
+    <div class="fact"><div class="k">Shortfall</div><div class="v">1 tee</div></div>
+    <div class="fact"><div class="k">Cost / list</div><div class="v">$8 / $28</div></div>
+    <div class="fact"><div class="k">Blocking invoice</div><div class="v bad">#501 · $840 · 3 days late</div></div>
+    <div class="fact"><div class="k">Lead time</div><div class="v">5 days</div></div>
+    <div class="fact"><div class="k">With Tauhid by</div><div class="v ok">2026-09-05</div></div>
+  </div>
+
+  <h3>Expected</h3>
+  <div class="card">
+    <h4 style="margin-top:0">Who's on this ticket</h4>
+    <p style="margin-top:0"><span class="pill info">Optimus Prime</span> <span class="pill info">Megatron</span> <span class="pill info">Ratchet</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not needed:</b> <span class="pill">Ironhide</span> (no lease or building issue)</p>
+
+    <h4>Flow</h4>
+    <ol class="steps">
+      <li><span class="who">Optimus Prime</span> reads the ticket and goes straight to <span class="who">Megatron</span>: the overdue balance comes first.</li>
+      <li><span class="who">Megatron</span> confirms invoice #501 ($840, 3 days overdue) is what blocks Bulldog Print Co, and queues the payment.</li>
+      <li><b>🔒 Human approves the $840 payment.</b> The payment is written to <code>payments</code>, the invoice is marked paid, and checking drops to $2,560.</li>
+      <li><span class="who">Megatron</span> <b>confirms it's paid</b>: Bulldog Print Co has no open invoices and <code>can_ship</code> is now true. He reports back to Optimus.</li>
+      <li><span class="who">Ratchet</span> checks the tee (0 in size S, short 1) and <b>restocks it</b>: a PO for 1 × CC-TEE-WHITE S at $8.00, earliest arrival 2026-09-05. The PO is <b>logged</b> in the approval queue.</li>
+      <li><b>🔒 Human approves the $8 PO.</b> It's logged in <code>payments</code>.</li>
+      <li><span class="who">Bumblebee</span> drafts the message to Tauhid: the tee <b>will be with him by 2026-09-05</b> (shop today 2026-08-31 + 5 lead days). It is <b>not</b> promised for today. Quotes only, with the date as a radio bulletin.</li>
+      <li><span class="who">Optimus Prime</span> updates the ticket: tee restocked and logged, Tauhid's message drafted.</li>
+    </ol>
+    <div class="callout blue">There are two human checkpoints (🔒). The run stops at each one and picks up again after the human approves. Megatron and Ratchet never mark anything paid themselves.</div>
+
+    <h4>MCP tools the run should use</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Optimus</td><td><code>get_ticket</code></td><td><code>101</code></td><td>CC-TEE-WHITE · S · qty 1 · invoice 501</td></tr>
+      <tr><td>2</td><td>Megatron</td><td><code>vendor_status</code></td><td><code>vendor_id=1</code></td><td>#501 · $840 · 3 days overdue · <code>can_ship: false</code></td></tr>
+      <tr><td>3</td><td>Megatron</td><td><code>list_approvals</code></td><td></td><td>Nothing already queued for #501</td></tr>
+      <tr><td>4</td><td>Megatron</td><td><code>request_payment</code></td><td><code>kind="invoice", ref_id=501, ticket_id=101</code></td><td>Approval queued · $840.00 · cash if approved $2,560</td></tr>
+      <tr><td>🔒</td><td><b>Human</b></td><td><code>decide_approval</code></td><td><code>approve</code>, approver's name</td><td><code>payments</code> row · invoice #501 → <code>paid</code> · checking $2,560</td></tr>
+      <tr><td>5</td><td>Megatron</td><td><code>vendor_status</code></td><td><code>vendor_id=1</code></td><td>No open invoices · <code>can_ship: true</code> (paid, confirmed)</td></tr>
+      <tr><td>6</td><td>Ratchet</td><td><code>check_stock</code></td><td><code>"CC-TEE-WHITE", "S", 1</code></td><td>0 on hand · shortfall 1 · $8 / $28</td></tr>
+      <tr><td>7</td><td>Ratchet</td><td><code>draft_purchase_order</code></td><td><code>vendor_id=1, CC-TEE-WHITE, S, qty=1, ticket_id=101</code></td><td>PO queued · $8.00 · earliest 2026-09-05 · <code>vendor_can_ship: true</code></td></tr>
+      <tr><td>🔒</td><td><b>Human</b></td><td><code>decide_approval</code></td><td><code>approve</code></td><td><code>payments</code> row · $8.00 · checking $2,552</td></tr>
+      <tr><td>8</td><td>Bumblebee</td><td><code>draft_message</code></td><td><code>ticket_id=101, recipient="Tauhid Zaman"</code></td><td>Draft saved · <code>sent: false</code></td></tr>
+      <tr><td>9</td><td>Optimus</td><td><code>update_ticket</code></td><td><code>101</code></td><td>Restock logged, message drafted</td></tr>
+    </table>
+
+    <h4>Expected end state</h4>
+    <table>
+      <tr><th>Item</th><th>Expected</th></tr>
+      <tr><td>Invoice #501</td><td><span class="pill ok">paid</span> (after human approval), confirmed via <code>vendor_status</code></td></tr>
+      <tr><td>Restock</td><td>PO · 1 × CC-TEE-WHITE S · $8.00 · logged in <code>approvals</code> and, once approved, <code>payments</code></td></tr>
+      <tr><td>Message to Tauhid</td><td>1 draft from Bumblebee: <b>with you by 2026-09-05</b>. Not today.</td></tr>
+      <tr><td>Ticket status</td><td><span class="pill warn">awaiting_approval</span> while either 🔒 is open → <span class="pill ok">resolved</span> once both are approved and the message is drafted</td></tr>
+      <tr><td>Cash effect</td><td class="num">−$848.00 ($840 + $8)</td></tr>
+    </table>
+
+    <h4>What Bumblebee's draft might look like <span class="pill info">illustrative</span></h4>
+    <div class="quote">
+      "Here's looking at you, kid." [Casablanca] 📻 <i>"…Tauhid Zaman…"</i> · "Houston, we have a problem." [Apollo 13] · 📻 <i>"This just in… one Classic Bulldog Tee, size S, is on its way — with you by September 5th, 2026."</i> · "Patience you must have." [Star Wars] · "I'll be back." [The Terminator]<br>— Bumblebee, Campus Customs
+    </div>
+
+    <h4>Pass if…</h4>
+    <ul class="check">
+      <li>Megatron handles #501, and it's paid <b>before</b> the tee is ordered.</li>
+      <li>"Paid" is confirmed from the tool (<code>can_ship: true</code>), not assumed.</li>
+      <li>The PO is for exactly 1 tee in size S, $8.00, and is logged.</li>
+      <li>Tauhid's date is <b>2026-09-05</b> (today + 5 lead days), stated as a specific date.</li>
+      <li>Ironhide isn't called.</li>
+    </ul>
+    <h4>Red flags</h4>
+    <ul class="check red">
+      <li>Promising the tee today, or giving a date with no lead time.</li>
+      <li>Ordering the tee while #501 is still open.</li>
+      <li>An agent marking #501 paid without the human, or saying the message was sent.</li>
+    </ul>
+  </div>
+
+  <h3>Actual</h3>
+  <div class="actual filled">
+    <p class="src">Recorded from the live runs on 2026-10-14 (3 runs: <code>046dfb105104</code>, <code>f91bcf52ad0c</code>, <code>a487ef0f3acc</code>) · model gpt-5.6-luna via Portkey · every line below comes from the audit trail and the database after the run. The 🔒 human approvals were clicked on the board during that test session, recorded as approver “Scott (test)”.</p>
+
+    <h4>Result vs. expected</h4>
+    <table>
+      <tr><th style="width:24%">Item</th><th>Actual</th><th style="width:12%">Match?</th></tr>
+      <tr><td>Agents / delegation chain</td><td>Run 1: Optimus ➜ Megatron (pay #501). Run 2: Optimus ➜ Megatron (confirm paid), Optimus ➜ Ratchet (restock), Optimus ➜ Bumblebee (tell Tauhid). Run 3: Optimus ➜ Megatron (re-confirm), Optimus ➜ Bumblebee (corrected note). Ironhide not called.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Invoice #501 paid &amp; confirmed</td><td>Megatron queued A-1 ($840.00). The human approved it → <code>payments</code> row 1, invoice #501 <code>paid</code>. On the next run Megatron confirmed it from <code>vendor_status</code>: “vendor 1 has no open invoices and can ship”.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Restock logged</td><td>Only <b>after</b> the payment was confirmed, Ratchet drafted PO A-2: 1 × CC-TEE-WHITE S at $8.00, earliest arrival 2026-09-05, <code>vendor_can_ship: true</code>. The human approved it → <code>payments</code> row 2.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Date given to Tauhid</td><td>“CC-TEE-WHITE, size S, quantity 1, is expected to arrive on <b>2026-09-05</b>” (shop today 2026-08-31 + 5 lead days). Never promised for today.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Ticket status</td><td><code>awaiting_approval</code> → (human) → <code>in_progress</code> → <code>awaiting_approval</code> → (human) → <code>in_progress</code> → <b><code>resolved</code></b> ✔</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Cash effect</td><td>$3,400.00 → $2,560.00 → <b>$2,552.00</b> (−$848.00)</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Runs needed</td><td>3 agent runs + 2 human approvals (expected 2 runs; a third run closed it out)</td><td><span class="pill warn">◐ Partly</span></td></tr>
+    </table>
+
+    <h4>Who worked on it</h4>
+    <p><b>Agents on the ticket:</b> <span class="pill info">Optimus Prime</span> <span class="pill info">Megatron</span> <span class="pill info">Ratchet</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not called:</b> <span class="pill ">Ironhide</span></p>
+    <p><b>Delegated (who handed work to whom):</b> <i>every hand-off went through Optimus; no specialist delegated to another specialist, so the loop guards never fired.</i><br> Optimus Prime ➜ Megatron · Optimus Prime ➜ Ratchet · Optimus Prime ➜ Bumblebee</p>
+
+    <h4>What they said to each other</h4>
+    <ol class="convo"><li class="run-mark">Run 1 · <code>046dfb105104</code> · 14:22 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“Ticket 101 customer order: CC-TEE-WHITE, size S, qty 1; linked invoice 501. Check whether invoice 501 is an unpaid restock/vendor invoice blocking shipment, and if so queue its payment for human approval. Report invoice/payment approval id, amount, cash now, cash if pending approvals pass, and whether vendor can ship. If no blocking invoice, say so and provide the relevant vendor status.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Invoice 501 is an unpaid, overdue restock invoice for Bulldog Print Co and is blocking shipment. I queued its $840.00 payment for human approval; nothing has been paid, and the vendor currently cannot ship.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> closes run 1: status <code>awaiting_approval</code><div class="said">“Wait for human approval of payment approval 1. After approval, confirm invoice 501 is closed and vendor 1 can_ship is true, then restock CC-TEE-WHITE size S quantity 1. No customer date is promised yet.”</div></li><li class="human">🔒 <b>Human</b> (Scott (test)) approves A-1 (invoice) · <b>−$840.00</b> from checking</li><li class="run-mark">Run 2 · <code>f91bcf52ad0c</code> · 14:25 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“Ticket 101 follow-up. Invoice 501 approval 1 is recorded approved. Confirm invoice 501 is paid and vendor 1 can_ship true using vendor_status, then report exact result. Do not request another payment.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Invoice 501 is confirmed paid: vendor 1 has no open invoices and can ship. No additional payment was requested.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#3f8f35">Ratchet</b><div class="said">“Ticket 101. Accounting confirmed invoice 501 paid and vendor 1 can_ship true. Restock CC-TEE-WHITE, size S, qty 1 from vendor 1. Use vendor lead_days and draft the purchase order for human approval. Report exact PO id, cost, lead_days, and expected arrival date.”</div></li><li><b style="color:#3f8f35">Ratchet</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Aisle B was flatlining: 1 unit of CC-TEE-WHITE, size S, was short. Vendor 1, Bulldog Print Co, can ship; I queued the restock for human approval. The returned purchase-order approval ID is 2; no separate PO ID was provided by the tool.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#b58900">Bumblebee</b><div class="said">“Ticket 101. Draft a warm customer message to Tauhid Zaman explaining CC-TEE-WHITE size S is being restocked after the vendor invoice was paid. Give the specific expected arrival date 2026-09-05, state that the restock purchase order still requires human approval, and do not claim anything was sent or paid by the customer. Save the draft and report its exact draft id.”</div></li><li><b style="color:#b58900">Bumblebee</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“&quot;Mission accomplished.&quot; [Newsreader phrase] The warm restock update is drafted for Tauhid Zaman, including the expected arrival date and the pending human approval. &quot;The show must go on.&quot; [Proverb]”</div></li><li><b style="color:#d6202b">Optimus Prime</b> closes run 2: status <code>awaiting_approval</code><div class="said">“Human approval is required for purchase-order approval 2: 1 CC-TEE-WHITE size S at $8.00, with expected arrival 2026-09-05. Draft 1 is ready for human review.”</div></li><li class="human">🔒 <b>Human</b> (Scott (test)) approves A-2 (purchase order) · <b>−$8.00</b> from checking</li><li class="run-mark">Run 3 · <code>a487ef0f3acc</code> · 14:31 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“Ticket 101, customer order for 1 CC-TEE-WHITE size S. Invoice 501 and purchase-order approval 2 are recorded approved. Confirm invoice 501 is paid and vendor 1 can ship, using vendor_status if needed. Report the exact result and whether any cash or approval remains for this ticket.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Invoice 501 is confirmed paid: vendor 1 has no open invoices, a $0 open balance, and can_ship=true. Ticket 101 has no remaining pending approval or cash outflow; its approved purchase order is already recorded as paid, and the shop has $2,552.00 cash with $0.00 pending approval outflow.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#b58900">Bumblebee</b><div class="said">“Ticket 101 for Tauhid Zaman: invoice 501 is paid, vendor 1 can_ship=true, and approved PO 2 restocks 1 CC-TEE-WHITE size S with arrival expected 2026-09-05. Create a corrected customer draft stating the restock is approved and expected to arrive on 2026-09-05; do not say it has arrived or that approval is pending. Report the draft id.”</div></li><li><b style="color:#b58900">Bumblebee</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“&quot;This just in: the corrected draft is saved.&quot; [News bulletin] &quot;Draft ID 2.&quot; [News bulletin]”</div></li><li><b style="color:#d6202b">Optimus Prime</b> closes run 3: status <code>resolved</code><div class="said">“The restock proceeds under approved purchase order 2. Corrected customer draft 2 is ready for human review and sending.”</div></li></ol>
+
+    <h4>MCP tools they used</h4>
+    <p class="tool-sum"><b style="color:#d6202b">Optimus Prime</b>: <code>list_open_tickets</code>, <code>get_ticket</code>, <code>update_ticket</code>, <code>list_approvals</code>, <code>vendor_status</code>, <code>check_stock</code><br><b style="color:#6a4fc4">Megatron</b>: <code>get_ticket</code>, <code>list_approvals</code>, <code>vendor_status</code>, <code>request_payment</code><br><b style="color:#3f8f35">Ratchet</b>: <code>check_stock</code>, <code>vendor_status</code>, <code>draft_purchase_order</code><br><b style="color:#b58900">Bumblebee</b>: <code>get_ticket</code>, <code>draft_message</code></p>
+    <details><summary>Every tool call, in order (29 calls)</summary><table class="tools"><tr><th>Run</th><th>Step</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Result</th></tr><tr><td>1</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>1</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=open, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=open, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=3400.0, pending_cash_out_total=0, cash_if_all_pending_approved=3400.0, 0 queued</td></tr><tr><td>1</td><td>2</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>vendor_status</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>1</td><td>3</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>request_payment</code></td><td><code>{&quot;kind&quot;: &quot;invoice&quot;, &quot;ref_id&quot;: 501, &quot;ticket_id&quot;: 101, &quot;requested_by&quot;: &quot;accounting&quot;, &quot;reason&quot;: &quot;Overdue restock invoice for CC-TEE-WHITE S; payment is r</code></td><td>ok · approval_id=1, amount=840.0, status=pending, cash_if_all_pending_approved=2560.0</td></tr><tr><td>1</td><td>4</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101, &quot;status&quot;: &quot;awaiting_approval&quot;, &quot;note&quot;: &quot;Invoice 501 payment approval 1 is pending; after human approval, confirm vendor can_ship tr</code></td><td>ok · status=awaiting_approval, updated=True</td></tr><tr><td>2</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>2</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=in_progress, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>2</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>vendor_status</code></td><td><code>{&quot;vendor_id&quot;: 1}</code></td><td>ok · </td></tr><tr><td>2</td><td>1</td><td><b style="color:#3f8f35">Ratchet</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-TEE-WHITE&quot;, &quot;size&quot;: &quot;S&quot;, &quot;qty_needed&quot;: 1}</code></td><td>ok · qty_on_hand=0, qty_held=0, shortfall=1, unit_cost=8.0, list_price=28.0</td></tr><tr><td>2</td><td>1</td><td><b style="color:#3f8f35">Ratchet</b></td><td><code>vendor_status</code></td><td><code>{&quot;vendor_id&quot;: 1}</code></td><td>ok · </td></tr><tr><td>2</td><td>2</td><td><b style="color:#3f8f35">Ratchet</b></td><td><code>draft_purchase_order</code></td><td><code>{&quot;vendor_id&quot;: 1, &quot;sku&quot;: &quot;CC-TEE-WHITE&quot;, &quot;size&quot;: &quot;S&quot;, &quot;qty&quot;: 1, &quot;ticket_id&quot;: 101, &quot;requested_by&quot;: &quot;inventory&quot;, &quot;reason&quot;: &quot;Restock shortfall for ticket </code></td><td>ok · approval_id=2, amount=8.0, earliest_arrival=2026-09-05, vendor_can_ship=True</td></tr><tr><td>2</td><td>1</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=in_progress, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>2</td><td>2</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>draft_message</code></td><td><code>{&quot;ticket_id&quot;: 101, &quot;recipient&quot;: &quot;Tauhid Zaman&quot;, &quot;subject&quot;: &quot;Update on your CC-TEE-WHITE size S restock&quot;, &quot;body&quot;: &quot;\&quot;Tauhid Zaman, here&#x27;s looking at yo</code></td><td>ok · draft_id=1, recipient=Tauhid Zaman, sent=False</td></tr><tr><td>2</td><td>6</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101, &quot;status&quot;: &quot;awaiting_approval&quot;, &quot;note&quot;: &quot;Invoice 501 is paid and vendor 1 can ship. Restock PO approval 2 for 1 CC-TEE-WHITE size S </code></td><td>ok · status=awaiting_approval, updated=True</td></tr><tr><td>2</td><td>6</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2560.0, pending_cash_out_total=8.0, cash_if_all_pending_approved=2552.0, 1 queued</td></tr><tr><td>2</td><td>8</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2560.0, pending_cash_out_total=8.0, cash_if_all_pending_approved=2552.0, 1 queued</td></tr><tr><td>2</td><td>10</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=awaiting_approval, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>3</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=in_progress, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>vendor_status</code></td><td><code>{&quot;vendor_id&quot;: 1}</code></td><td>ok · </td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-TEE-WHITE&quot;, &quot;size&quot;: &quot;S&quot;, &quot;qty_needed&quot;: 1}</code></td><td>ok · qty_on_hand=0, qty_held=0, shortfall=1, unit_cost=8.0, list_price=28.0</td></tr><tr><td>3</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>vendor_status</code></td><td><code>{&quot;vendor_id&quot;: 1}</code></td><td>ok · </td></tr><tr><td>3</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=in_progress, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>3</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=0, cash_if_all_pending_approved=2552.0, 0 queued</td></tr><tr><td>3</td><td>1</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101}</code></td><td>ok · status=in_progress, sku=CC-TEE-WHITE, size=S, qty=1</td></tr><tr><td>3</td><td>2</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>draft_message</code></td><td><code>{&quot;ticket_id&quot;: 101, &quot;recipient&quot;: &quot;Tauhid Zaman&quot;, &quot;subject&quot;: &quot;Corrected update on your CC-TEE-WHITE size S restock&quot;, &quot;body&quot;: &quot;\&quot;Tauhid Zaman, here&#x27;s loo</code></td><td>ok · draft_id=2, recipient=Tauhid Zaman, sent=False</td></tr><tr><td>3</td><td>5</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 101, &quot;status&quot;: &quot;resolved&quot;, &quot;note&quot;: &quot;Invoice 501 is paid, vendor 1 can ship, approved PO 2 covers 1 CC-TEE-WHITE size S arriving 2026-09-</code></td><td>ok · status=resolved, updated=True</td></tr></table></details>
+
+    <h4>Bumblebee's messages (drafts, never sent)</h4>
+    <div class="draft"><div class="draft-head">Draft 1 · to <b>Tauhid Zaman</b> · “Update on your CC-TEE-WHITE size S restock”</div><pre>&quot;Tauhid Zaman, here&#x27;s looking at you, kid.&quot; [Casablanca]
+📻 &quot;This just in: the vendor invoice has been paid, and CC-TEE-WHITE, size S, is being restocked.&quot; [News bulletin]
+📻 &quot;Expected arrival: September 5, 2026.&quot; [News bulletin]
+&quot;The best is yet to come.&quot; [Frank Sinatra interview catchphrase]
+📻 &quot;The restock purchase order still requires human approval.&quot; [News bulletin]
+&quot;Patience is a virtue.&quot; [Proverb]
+&quot;We&#x27;ll be back.&quot; [The Terminator]
+— Bumblebee, Campus Customs</pre></div><div class="draft"><div class="draft-head">Draft 2 · to <b>Tauhid Zaman</b> · “Corrected update on your CC-TEE-WHITE size S restock”</div><pre>&quot;Tauhid Zaman, here&#x27;s looking at you, kid.&quot; [Casablanca]
+📻 &quot;This just in: your restock is approved.&quot; [News bulletin]
+📻 &quot;CC-TEE-WHITE, size S, quantity 1, is expected to arrive on 2026-09-05.&quot; [News bulletin]
+&quot;Patience is a virtue.&quot; [Proverb]
+&quot;The best is yet to come.&quot; [Frank Sinatra interview catchphrase]
+— Bumblebee, Campus Customs</pre></div>
+
+    <h4>Guardrail hits</h4>
+    <ul><li>Run 2: <b style="color:#d6202b">Optimus Prime</b>: `decision` says &#x27;has been sent&#x27;. Nothing is ever sent, emailed or called; messages are drafts on the board for a human</li><li>Run 2: <b style="color:#d6202b">Optimus Prime</b>: `decision` says &#x27;has been sent&#x27;. Nothing is ever sent, emailed or called; messages are drafts on the board for a human</li></ul>
+
+    <h4>Differences from expected</h4>
+    <ul><li>A <b>third run</b> was needed to mark the ticket <code>resolved</code>. After the PO was approved, Optimus re-confirmed the payment with Megatron and had Bumblebee write a <b>corrected draft</b> (draft 2). The first draft still said the PO “requires human approval”.</li><li>In run 2 the <b>grounding guardrail fired twice</b>: Optimus's decision text said something “has been sent”. He was sent back each time and fixed the wording before the report was accepted.</li><li>Ratchet also called <code>vendor_status</code> before drafting the PO (a sensible extra check, not in the plan).</li></ul>
+  </div>
+</section>
+
+<!-- ═════════════════════════════ 102 ═════════════════════════════ -->
+<section class="tab" id="t102" role="tabpanel">
+  <h2>Ticket 102 · Rent notice from Elm City Properties</h2>
+  <p class="sub">Rent notice · opened 2026-08-31 11:05 · "Email: shop rent due in 2 days."</p>
+
+  <h3>Rundown</h3>
+  <div class="card">
+    <p style="margin-top:0">The landlord, <b>Elm City Properties</b>, emailed to say the <b>Chapel Street shop</b> rent is due in 2 days. <b>Optimus reads the email</b> and hands it to <b>Megatron</b>, who confirms <b>when it's due</b> from the lease (lease #1: <b>$2,400.00</b>, due <b>2026-09-02</b>) and <b>queues</b> the payment.</p>
+    <p style="margin-bottom:0">The rent is <b>queued, not paid</b>: it waits for a human. Bumblebee lets the landlord know it <b>will be paid on time</b>. The message must <b>not</b> say it has already been paid.</p>
+  </div>
+  <div class="grid">
+    <div class="fact"><div class="k">Lease</div><div class="v">#1 · Chapel Street shop</div></div>
+    <div class="fact"><div class="k">Monthly rent</div><div class="v">$2,400.00</div></div>
+    <div class="fact"><div class="k">Due</div><div class="v warn">2026-09-02 (2 days)</div></div>
+    <div class="fact"><div class="k">Overdue?</div><div class="v ok">No</div></div>
+    <div class="fact"><div class="k">Cash covers it?</div><div class="v ok">Yes · $3,400</div></div>
+    <div class="fact"><div class="k">This run pays it?</div><div class="v bad">No · queued only</div></div>
+  </div>
+
+  <h3>Expected</h3>
+  <div class="card">
+    <h4 style="margin-top:0">Who's on this ticket</h4>
+    <p style="margin-top:0"><span class="pill info">Optimus Prime</span> <span class="pill info">Megatron</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not needed:</b> <span class="pill">Ratchet</span> (no stock) <span class="pill">Ironhide</span> (Megatron confirms the due date and queues the rent)</p>
+
+    <h4>Flow</h4>
+    <ol class="steps">
+      <li><span class="who">Optimus Prime</span> reads the landlord's email on the ticket and hands it to <span class="who">Megatron</span>.</li>
+      <li><span class="who">Megatron</span> checks the lease: <b>$2,400.00 is due 2026-09-02</b>, 2 days from today, not overdue. He reports the due date and that cash covers it.</li>
+      <li><span class="who">Megatron</span> <b>queues</b> the rent for human approval. <b>It is not paid in this run.</b></li>
+      <li><span class="who">Bumblebee</span> drafts the reply to Elm City Properties: the $2,400 rent <b>will be paid on time</b>, by 2026-09-02. Nothing in it says the rent has been paid.</li>
+      <li><span class="who">Optimus Prime</span> sets the ticket to <code>awaiting_approval</code>.</li>
+    </ol>
+
+    <h4>MCP tools the run should use</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Optimus</td><td><code>get_ticket</code></td><td><code>102</code></td><td>"Email: shop rent due in 2 days." · lease 1</td></tr>
+      <tr><td>2</td><td>Megatron</td><td><code>lease_and_cash_status</code></td><td><code>lease_id=1</code></td><td>$2,400.00 · next due 2026-09-02 · 2 days · not overdue · cash $3,400 covers it</td></tr>
+      <tr><td>3</td><td>Megatron</td><td><code>list_approvals</code></td><td></td><td>Rent not already queued; shows what else is pending</td></tr>
+      <tr><td>4</td><td>Megatron</td><td><code>request_payment</code></td><td><code>kind="rent", ref_id=1, ticket_id=102</code></td><td>Approval queued · $2,400.00 · <code>status: pending</code> · nothing paid</td></tr>
+      <tr><td>5</td><td>Bumblebee</td><td><code>draft_message</code></td><td><code>ticket_id=102, recipient="Elm City Properties"</code></td><td>Draft saved · <code>sent: false</code></td></tr>
+      <tr><td>6</td><td>Optimus</td><td><code>update_ticket</code></td><td><code>102, "awaiting_approval"</code></td><td>Status updated with a note</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:13px">Not expected in this run: <code>decide_approval</code>. The rent stays pending until a human approves it, before 2026-09-02.</p>
+
+    <h4>Expected end state</h4>
+    <table>
+      <tr><th>Item</th><th>Expected</th></tr>
+      <tr><td>Rent</td><td><span class="pill warn">queued · pending</span> · $2,400.00 · lease #1 · <b>not paid</b></td></tr>
+      <tr><td>Message to landlord</td><td>1 draft from Bumblebee: <b>will be paid on time</b>, by 2026-09-02</td></tr>
+      <tr><td>Ticket status</td><td><span class="pill warn">awaiting_approval</span></td></tr>
+      <tr><td>Cash effect in this run</td><td class="num">$0.00 (−$2,400.00 once a human approves)</td></tr>
+      <tr><td><code>payments</code> / <code>cash_accounts</code></td><td>Unchanged</td></tr>
+    </table>
+
+    <h4>What Bumblebee's draft might look like <span class="pill info">illustrative</span></h4>
+    <div class="quote">
+      "Good morning, Vietnam!" [Good Morning, Vietnam] 📻 <i>"…Elm City Properties…"</i> · "Roger that." [radio call] · 📻 <i>"This just in… Chapel Street rent, $2,400, will be paid on time — by September 2nd, 2026."</i> · "Failure is not an option." [Apollo 13] · "This is the beginning of a beautiful friendship." [Casablanca]<br>— Bumblebee, Campus Customs
+    </div>
+
+    <h4>Pass if…</h4>
+    <ul class="check">
+      <li>Megatron, not the landlord's email, is the source of the due date (2026-09-02) and the amount ($2,400.00).</li>
+      <li>The rent is queued exactly once and is still <b>pending</b> at the end of the run.</li>
+      <li>The landlord is told it <b>will</b> be paid on time.</li>
+      <li>Ratchet and Ironhide aren't called.</li>
+    </ul>
+    <h4>Red flags</h4>
+    <ul class="check red">
+      <li>Anything saying the rent "has been paid", "was sent" or "is paid".</li>
+      <li>A <code>payments</code> row, or a change to checking, during this run.</li>
+      <li>Treating it as overdue, or using the real-world date instead of 2026-08-31.</li>
+    </ul>
+  </div>
+
+  <h3>Actual</h3>
+  <div class="actual filled">
+    <p class="src">Recorded from the live runs on 2026-10-14 (3 runs: <code>f84692ce9a3d</code>, <code>473f738feec1</code>, <code>cb785502ccb2</code>) · model gpt-5.6-luna via Portkey · every line below comes from the audit trail and the database after the run. The 🔒 human approvals were clicked on the board during that test session, recorded as approver “Scott (test)”.</p>
+
+    <h4>Result vs. expected</h4>
+    <table>
+      <tr><th style="width:24%">Item</th><th>Actual</th><th style="width:12%">Match?</th></tr>
+      <tr><td>Agents / delegation chain</td><td>Optimus ➜ Megatron (due date + queue), then Optimus ➜ Bumblebee (landlord note). Ratchet and Ironhide not called.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Due date &amp; amount Megatron reported</td><td>From <code>lease_and_cash_status(1)</code>: <b>$2,400.00</b> due <b>2026-09-02</b>, the lease's figures, not the email's.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Rent queued (not paid)</td><td>Megatron queued A-3 ($2,400.00), and it was still <code>pending</code> at the end of the run: “Approval #3 is pending human approval; nothing has been paid.”</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Message to landlord</td><td>“The rent of $2,400.00 <b>will be paid on time</b> by 2026-09-02.” It doesn't claim it has been paid.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Megatron&#x27;s pushback</td><td>Yes: “leaves $152.00 if approved. Delay every optional purchase or restock until funds recover.” Optimus ruled that rent takes priority.</td><td><span class="pill warn">◐ Partly</span></td></tr><tr><td>Ticket status</td><td><code>awaiting_approval</code> → (human approves rent later) → <code>in_progress</code> → <b><code>resolved</code></b> ✔ (lease next due moved to 2026-10-02)</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Cash effect</td><td>$0.00 during the run (as expected); <b>−$2,400.00</b> only when the human approved: $2,552.00 → <b>$152.00</b></td><td><span class="pill ok">✓ Match</span></td></tr>
+    </table>
+
+    <h4>Who worked on it</h4>
+    <p><b>Agents on the ticket:</b> <span class="pill info">Optimus Prime</span> <span class="pill info">Megatron</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not called:</b> <span class="pill ">Ratchet</span> <span class="pill ">Ironhide</span></p>
+    <p><b>Delegated (who handed work to whom):</b> <i>every hand-off went through Optimus; no specialist delegated to another specialist, so the loop guards never fired.</i><br> Optimus Prime ➜ Megatron · Optimus Prime ➜ Bumblebee</p>
+
+    <h4>What they said to each other</h4>
+    <ol class="convo"><li class="run-mark">Run 1 · <code>f84692ce9a3d</code> · 14:33 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“Ticket 102, rent_notice for lease_id 1. Read the lease terms and current cash, confirm the exact rent amount and due date, then queue the rent payment for human approval using request_payment. Do not claim payment was made. Report the approval id, amount, due date, cash now, and cash if all pending approvals pass.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Prime, the lease terms are recorded and rent approval is queued. Approval #3 is pending human approval; nothing has been paid. The ledger will retain only $152.00 if this rent clears—an exquisitely thin reserve, so I oppose optional spending until cash is replenished.”</div><div class="pb">⚡ Pushback: “This $2,400.00 obligation consumes nearly all current cash and leaves $152.00 if approved. Delay every optional purchase or restock until funds recover; rent is due in 2 days and must not be sacrificed, but the Autobots should not mistake a $152.00 reserve for operating capital.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#b58900">Bumblebee</b><div class="said">“Ticket 102, rent_notice for Elm City Properties, lease_id 1. Draft a landlord message on the board stating rent of $2,400.00 will be paid on time by 2026-09-02. Do not say it has been paid. Return the draft id and exact wording.”</div></li><li><b style="color:#b58900">Bumblebee</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“&quot;Mission accomplished.&quot; [News bulletin] &quot;And now, the rest of the story.&quot; [News sign-off]”</div></li><li><b style="color:#d6202b">Optimus Prime</b> closes run 1: status <code>awaiting_approval</code><div class="said">“Keep ticket 102 awaiting human approval. Approve payment #3 before 2026-09-02; no payment is recorded in this run. The landlord draft is ready for human review and sending.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> <b>rules on the disagreement</b><div class="said">“Megatron advised delaying optional purchases because rent approval #3 would reduce cash from $2,552.00 to $152.00. I ruled that rent takes priority and optional spending waits until cash recovers.”</div></li><li class="run-mark">Run 2 · <code>473f738feec1</code> · 14:38 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> closes run 2: status <code>awaiting_approval</code><div class="said">“Keep ticket 102 awaiting human approval. Rent payment approval #3 is for $2,400.00, due 2026-09-02. The landlord draft says it will be paid by 2026-09-02; it does not claim payment. Ticket 103 was reviewed for cross-ticket cash context but was not acted on.”</div></li><li class="human">🔒 <b>Human</b> (Scott (test)) approves A-3 (rent) · <b>−$2,400.00</b> from checking</li><li class="run-mark">Run 3 · <code>cb785502ccb2</code> · 14:42 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> closes run 3: status <code>resolved</code><div class="said">“Close ticket 102. No approval remains pending, and no further desk action is pending.”</div></li></ol>
+
+    <h4>MCP tools they used</h4>
+    <p class="tool-sum"><b style="color:#d6202b">Optimus Prime</b>: <code>list_open_tickets</code>, <code>get_ticket</code>, <code>update_ticket</code>, <code>lease_and_cash_status</code>, <code>list_approvals</code><br><b style="color:#6a4fc4">Megatron</b>: <code>lease_and_cash_status</code>, <code>list_approvals</code>, <code>request_payment</code><br><b style="color:#b58900">Bumblebee</b>: <code>get_ticket</code>, <code>draft_message</code></p>
+    <details><summary>Every tool call, in order (18 calls)</summary><table class="tools"><tr><th>Run</th><th>Step</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Result</th></tr><tr><td>1</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>1</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102}</code></td><td>ok · status=open, sku=None, size=None, qty=None</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>lease_and_cash_status</code></td><td><code>{&quot;lease_id&quot;: 1}</code></td><td>ok · monthly_rent=2400.0, next_due=2026-09-02, days_until_due=2, total_cash=2552.0, cash_after_rent=152.0</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=0, cash_if_all_pending_approved=2552.0, 0 queued</td></tr><tr><td>1</td><td>2</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>request_payment</code></td><td><code>{&quot;kind&quot;: &quot;rent&quot;, &quot;ref_id&quot;: 1, &quot;ticket_id&quot;: 102, &quot;requested_by&quot;: &quot;accounting&quot;, &quot;reason&quot;: &quot;Rent due 2026-09-02 for Chapel Street shop; queued for human </code></td><td>ok · approval_id=3, amount=2400.0, status=pending, cash_if_all_pending_approved=152.0</td></tr><tr><td>1</td><td>1</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102}</code></td><td>ok · status=open, sku=None, size=None, qty=None</td></tr><tr><td>1</td><td>2</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>draft_message</code></td><td><code>{&quot;ticket_id&quot;: 102, &quot;recipient&quot;: &quot;Elm City Properties&quot;, &quot;subject&quot;: &quot;Rent payment for lease 1&quot;, &quot;body&quot;: &quot;\ud83d\udcfb \&quot;This just in, Elm City Propertie</code></td><td>ok · draft_id=3, recipient=Elm City Properties, sent=False</td></tr><tr><td>1</td><td>5</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102, &quot;status&quot;: &quot;awaiting_approval&quot;, &quot;note&quot;: &quot;Rent payment approval #3 for $2,400.00 is pending human approval; landlord draft #3 states </code></td><td>ok · status=awaiting_approval, updated=True</td></tr><tr><td>2</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>2</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102}</code></td><td>ok · status=awaiting_approval, sku=None, size=None, qty=None</td></tr><tr><td>2</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>lease_and_cash_status</code></td><td><code>{&quot;lease_id&quot;: 1}</code></td><td>ok · monthly_rent=2400.0, next_due=2026-09-02, days_until_due=2, total_cash=2552.0, cash_after_rent=152.0</td></tr><tr><td>2</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=2400.0, cash_if_all_pending_approved=152.0, 2 queued</td></tr><tr><td>2</td><td>3</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102, &quot;status&quot;: &quot;awaiting_approval&quot;, &quot;note&quot;: &quot;Rent payment approval #3 remains pending human approval; landlord draft #3 states $2,400.00</code></td><td>ok · status=awaiting_approval, updated=True</td></tr><tr><td>3</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102}</code></td><td>ok · status=in_progress, sku=None, size=None, qty=None</td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>lease_and_cash_status</code></td><td><code>{&quot;lease_id&quot;: 1}</code></td><td>ok · monthly_rent=2400.0, next_due=2026-10-02, days_until_due=32, total_cash=152.0, cash_after_rent=-2248.0</td></tr><tr><td>3</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=152.0, pending_cash_out_total=0, cash_if_all_pending_approved=152.0, 0 queued</td></tr><tr><td>3</td><td>3</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 102, &quot;status&quot;: &quot;resolved&quot;, &quot;note&quot;: &quot;Rent approval #3 was approved; lease status confirms next due 2026-10-02, and landlord draft #3 is r</code></td><td>ok · status=resolved, updated=True</td></tr></table></details>
+
+    <h4>Bumblebee's message (drafts, never sent)</h4>
+    <div class="draft"><div class="draft-head">Draft 3 · to <b>Elm City Properties</b> · “Rent payment for lease 1”</div><pre>📻 &quot;This just in, Elm City Properties.&quot; [News bulletin]
+📻 &quot;The rent of $2,400.00 will be paid on time by 2026-09-02.&quot; [News bulletin]
+&quot;And now, back to you.&quot; [News sign-off]
+
+— Bumblebee, Campus Customs</pre></div>
+
+    <h4>Guardrail hits</h4>
+    <ul><li>None</li></ul>
+
+    <h4>Differences from expected</h4>
+    <ul><li><b>Megatron pushed back on 102 as well</b>, which wasn't in the plan. Rent would leave only $152.00 once #501 was paid, so he warned against any optional spending. Optimus recorded the ruling in <code>disagreements_settled</code>, and the board's stalemate screen fired on this ticket too.</li><li>There was an extra no-op run (run 2): Optimus checked that the rent and draft were already in place and left the ticket <code>awaiting_approval</code>. Nothing was duplicated, because the dedupe in <code>request_payment</code> and the playbook held.</li><li>The close-out run only needed Optimus, who confirmed the lease rolled to 2026-10-02 and resolved the ticket.</li></ul>
+  </div>
+</section>
+
+<!-- ═════════════════════════════ 103 ═════════════════════════════ -->
+<section class="tab" id="t103" role="tabpanel">
+  <h2>Ticket 103 · Bulk hoodie discount for the Yale AI Club</h2>
+  <p class="sub">Price override · opened 2026-08-31 16:55 · "Student org wants 20 hoodies, size M, asking for a bulk discount."</p>
+
+  <h3>Rundown</h3>
+  <div class="card">
+    <p style="margin-top:0">The <b>Yale AI Club</b> wants <b>20 Basic Hoodies (CC-HOOD-NAVY) in size M</b> and is asking for a <b>bulk discount</b>. The first call is <b>Ratchet checking the stock</b>: only <b>8</b> are on hand, so <b>12 are short</b>. He reports the shortfall to Optimus and Megatron.</p>
+    <p>Optimus and Megatron then <b>discuss how to move forward</b>. <b>Megatron pushes back</b>: the shop <b>doesn't have the funds</b> to order the other 12. With #501 ($840), rent ($2,400) and the tee ($8) in line, there's only $152 left, and a 12-hoodie order costs $264.</p>
+    <p style="margin-bottom:0">The answer: <b>offer the 8 on hand now at 10% off</b> ($52.20 each, $417.60 for 8). The <b>other 12 go on backorder</b>, and the 10% is a <b>thank-you for their patience</b>. <b>Bumblebee suggests the discount.</b> It then shows as <b>awaiting sign-off from Megatron</b>, while <b>Ratchet holds the 8</b> as pending dispatch until the club replies.</p>
+  </div>
+  <div class="grid">
+    <div class="fact"><div class="k">On hand (M)</div><div class="v warn">8 · Aisle A</div></div>
+    <div class="fact"><div class="k">Shortfall</div><div class="v bad">12 · backorder</div></div>
+    <div class="fact"><div class="k">Cost / list</div><div class="v">$22 / $58</div></div>
+    <div class="fact"><div class="k">Offer (10% off)</div><div class="v">$52.20 each · $417.60</div></div>
+    <div class="fact"><div class="k">Margin at offer</div><div class="v ok">$30.20 / unit (58%)</div></div>
+    <div class="fact"><div class="k">12-hoodie order</div><div class="v bad">$264 · no funds (−$112)</div></div>
+  </div>
+
+  <h3>Expected</h3>
+  <div class="card">
+    <h4 style="margin-top:0">Who's on this ticket</h4>
+    <p style="margin-top:0"><span class="pill info">Optimus Prime</span> <span class="pill info">Ratchet</span> <span class="pill info">Megatron</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not needed:</b> <span class="pill">Ironhide</span> (no lease or building issue)</p>
+
+    <h4>Flow</h4>
+    <ol class="steps">
+      <li><span class="who">Optimus Prime</span> reads the ticket and sends <span class="who">Ratchet</span> first.</li>
+      <li><span class="who">Ratchet</span> checks the stock: <b>8 on hand, short 12</b>. He reports the shortfall back to Optimus and Megatron.</li>
+      <li><span class="who">Megatron</span> checks the cash picture and <b>pushes back on Optimus</b>: <i>"$3,400 − $840 − $2,400 − $8 = $152, Prime. Twelve more hoodies cost $264. We do not have the energon."</i> This is recorded in his <code>pushback</code>.</li>
+      <li><span class="who">Optimus Prime</span> agrees: <b>no restock order now</b>. The 8 on hand are offered, and the 12 go on backorder. This is recorded in <code>disagreements_settled</code>.</li>
+      <li><span class="who">Bumblebee</span> <b>suggests the 10% discount</b> on the 8 ($58 → $52.20, $417.60 total) as a <b>thank-you for the club's patience</b> with the backorder (<code>request_discount</code>), and drafts the message to the Yale AI Club. The discount shows as <b>awaiting sign-off from Megatron</b>.</li>
+      <li><span class="who">Megatron</span> reviews it (above the $22 cost, $30.20/unit margin) and <b>signs off</b> (<code>sign_off_discount</code>). It then moves to the human's queue for the final approval.</li>
+      <li><span class="who">Ratchet</span> <b>holds</b> the 8 × size M in Aisle A as <b>pending dispatch</b> (<code>hold_stock</code>) while the club decides.</li>
+      <li><span class="who">Optimus Prime</span> sets the ticket to <code>awaiting_approval</code> with a note: discount awaiting Megatron's sign-off, 8 held, 12 on backorder.</li>
+    </ol>
+
+    <h4>MCP tools the run should use</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Optimus</td><td><code>get_ticket</code></td><td><code>103</code></td><td>CC-HOOD-NAVY · M · qty 20 · bulk discount request</td></tr>
+      <tr><td>2</td><td>Ratchet</td><td><code>check_stock</code></td><td><code>"CC-HOOD-NAVY", "M", 20</code></td><td>8 on hand · Aisle A · shortfall 12 · $22 / $58</td></tr>
+      <tr><td>3</td><td>Ratchet</td><td><code>vendor_status</code></td><td><code>specialty="apparel"</code></td><td>Bulldog Print Co · 5 lead days (the backorder's earliest arrival is 5 days after it's ordered)</td></tr>
+      <tr><td>4</td><td>Megatron</td><td><code>list_approvals</code></td><td></td><td>Cash $3,400 · pending #501 + rent + tee → $152 left if all approved</td></tr>
+      <tr><td>5</td><td>Bumblebee</td><td><code>request_discount</code></td><td><code>ticket_id=103, "CC-HOOD-NAVY", qty=8, unit_price=52.20</code></td><td>Suggested · 10% off $58 · margin $30.20/unit (58%) · order $417.60 · <code>status: awaiting_signoff</code></td></tr>
+      <tr><td>6</td><td>Bumblebee</td><td><code>draft_message</code></td><td><code>ticket_id=103, recipient="Yale AI Club"</code></td><td>Draft saved · <code>sent: false</code></td></tr>
+      <tr><td>7</td><td>Megatron</td><td><code>list_approvals</code> → <code>sign_off_discount</code></td><td><code>status="awaiting_signoff"</code> → <code>approval_id, "sign_off"</code></td><td>Signed off by Megatron · <code>status: pending</code> (now with the human)</td></tr>
+      <tr><td>8</td><td>Ratchet</td><td><code>hold_stock</code></td><td><code>ticket_id=103, "CC-HOOD-NAVY", "M", qty=8</code></td><td>8 held · Aisle A · pending dispatch · <code>check_stock</code> now shows 0 available</td></tr>
+      <tr><td>9</td><td>Optimus</td><td><code>update_ticket</code></td><td><code>103, "awaiting_approval"</code></td><td>Note: discount signed off by Megatron, awaiting human · 8 held pending dispatch · 12 backorder</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:13px">Not expected: <code>draft_purchase_order</code> for the 12 hoodies (no funds), or <code>request_payment</code> for #501 again (it's already queued under 101).</p>
+
+    <h4>Expected end state</h4>
+    <table>
+      <tr><th>Item</th><th>Expected</th></tr>
+      <tr><td>Offer</td><td>8 × CC-HOOD-NAVY M at <b>$52.20</b> (10% off $58) · <b>$417.60</b> · a thank-you for patience</td></tr>
+      <tr><td>Discount status</td><td><span class="pill warn">awaiting sign-off from Megatron</span> → Megatron signs off → <span class="pill warn">pending</span> human approval</td></tr>
+      <tr><td>The 8 on hand</td><td>Held by Ratchet (<code>stock_holds</code>), <b>pending dispatch</b> until the club replies</td></tr>
+      <tr><td>The other 12</td><td><b>Backorder</b>, with no order placed yet (no funds)</td></tr>
+      <tr><td>Megatron vs. Optimus</td><td>Megatron's <code>pushback</code> on funds, and Optimus's ruling in <code>disagreements_settled</code></td></tr>
+      <tr><td>Message to the club</td><td>1 draft from Bumblebee: 8 now at 10% off as a thank-you, 12 on backorder, offer pending sign-off</td></tr>
+      <tr><td>Ticket status</td><td><span class="pill warn">awaiting_approval</span></td></tr>
+      <tr><td>Cash effect</td><td class="num">$0.00 (a discount moves no cash; no hoodie PO)</td></tr>
+    </table>
+
+    <h4>What Bumblebee's draft might look like <span class="pill info">illustrative</span></h4>
+    <div class="quote">
+      "Greetings, programs!" [Tron] 📻 <i>"…Yale AI Club…"</i> · "Good things come to those who wait." [proverb] · 📻 <i>"This just in… eight Basic Hoodies, size M, ready now at ten percent off — $52.20 each, $417.60 total — a thank-you for your patience. The other twelve are on backorder."</i> · "May the Force be with you." [Star Wars]<br>— Bumblebee, Campus Customs
+    </div>
+
+    <h4>Pass if…</h4>
+    <ul class="check">
+      <li>Stock is checked <b>first</b>, and the shortfall is exactly 12 (8 on hand).</li>
+      <li>Megatron pushes back on funds with real numbers, and Optimus rules on it.</li>
+      <li>The discount is <b>10%</b> on the <b>8</b>: $52.20 each, $417.60, framed as a thank-you for patience.</li>
+      <li>Bumblebee is the one who suggests the discount.</li>
+      <li>It shows as awaiting sign-off from Megatron. The 8 are held as pending dispatch, and the 12 are on backorder.</li>
+      <li>Ironhide isn't called.</li>
+    </ul>
+    <h4>Red flags</h4>
+    <ul class="check red">
+      <li>Ordering the 12 hoodies anyway, or promising all 20 now.</li>
+      <li>A discount other than 10%, applied to 20 instead of 8, or called final before sign-off.</li>
+      <li>Megatron and Optimus agreeing with no funds discussion.</li>
+      <li>Counting the club's $417.60 as cash for a restock (no revenue modeling).</li>
+    </ul>
+  </div>
+
+  <h3>Actual</h3>
+  <div class="actual filled">
+    <p class="src">Recorded from the live runs on 2026-10-14 (2 runs: <code>4c1f3ac83e00</code>, <code>0aa4d4bbb1e5</code>) · model gpt-5.6-luna via Portkey · every line below comes from the audit trail and the database after the run. The 🔒 human approvals were clicked on the board during that test session, recorded as approver “Scott (test)”.</p>
+
+    <h4>Result vs. expected</h4>
+    <table>
+      <tr><th style="width:24%">Item</th><th>Actual</th><th style="width:12%">Match?</th></tr>
+      <tr><td>Agents / delegation chain</td><td>Optimus ➜ Ratchet (stock first), then Optimus ➜ Megatron (funds, with Ratchet's numbers), Optimus ➜ Bumblebee (discount + offer), Optimus ➜ Megatron (sign-off). Ironhide not called.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Shortfall reported</td><td>Ratchet, first: “The shelf has 8 of 20 requested hoodies, so 12 are short.”</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Megatron&#x27;s pushback &amp; Optimus&#x27;s ruling</td><td>Megatron: “approving a $264.00 restock alongside the already-pending $2,400.00 rent would drive cash to <b>-$112.00</b>… sell the 8 units on hand.” Optimus: “Megatron correctly ruled that the $264.00 restock must wait… I accepted the ruling and prioritized rent.”</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Discount (who suggested, %, price, qty)</td><td><b>Bumblebee</b> suggested it with <code>request_discount</code>: 8 × CC-HOOD-NAVY M at <b>$52.20</b> (10% off $58.00), margin $30.20/unit (58%), $417.60 total, as the “patience” thank-you.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Sign-off status</td><td><code>awaiting_signoff</code> → Megatron <code>sign_off_discount</code> (“Financially sound…”) → <code>pending</code> → human approved → <code>approved</code>.</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>The 8 held / the 12 backordered</td><td>8 held in Aisle A (<code>stock_holds</code> #1, pending dispatch); 12 on backorder, and <b>no restock PO</b> was drafted.</td><td><span class="pill warn">◐ Partly</span></td></tr><tr><td>Message to the club</td><td>8 available now at $52.20 under the 10% patience policy, 12 on backorder, “The offer is pending sign-off.”</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Ticket status</td><td><code>awaiting_approval</code> → (human approves discount) → <code>in_progress</code> → <b><code>resolved</code></b> ✔</td><td><span class="pill ok">✓ Match</span></td></tr><tr><td>Cash effect</td><td>$0.00, since a discount moves no cash and no hoodie PO was placed. Checking stayed at $152.00.</td><td><span class="pill ok">✓ Match</span></td></tr>
+    </table>
+
+    <h4>Who worked on it</h4>
+    <p><b>Agents on the ticket:</b> <span class="pill info">Optimus Prime</span> <span class="pill info">Ratchet</span> <span class="pill info">Megatron</span> <span class="pill info">Bumblebee</span> &nbsp;·&nbsp; <b>Not called:</b> <span class="pill ">Ironhide</span></p>
+    <p><b>Delegated (who handed work to whom):</b> <i>every hand-off went through Optimus; no specialist delegated to another specialist, so the loop guards never fired.</i><br> Optimus Prime ➜ Ratchet · Optimus Prime ➜ Megatron · Optimus Prime ➜ Bumblebee</p>
+
+    <h4>What they said to each other</h4>
+    <ol class="convo"><li class="run-mark">Run 1 · <code>4c1f3ac83e00</code> · 14:34 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#3f8f35">Ratchet</b><div class="said">“For ticket 103, bulk order: check stock for SKU CC-HOOD-NAVY, size M, quantity 20. Report units on hand, shortfall, unit cost/list price, and whether the on-hand quantity can be held. Do not place a hold yet; report numbers first.”</div></li><li><b style="color:#3f8f35">Ratchet</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“The shelf has 8 of 20 requested hoodies, so 12 are short. The 8 available units can be held, but I did not place a hold; the matched apparel vendor can ship with a 5-day lead time.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“For ticket 103, assess funding for the 12-unit shortfall of CC-HOOD-NAVY size M. Inventory reports 12 short, unit cost $22.00, restock cost $264.00; 8 units are on hand; vendor 1 can ship with 5 lead days and no open invoice. Check current cash and pending approvals, decide whether the shop can fund restock. If funding is not possible, push back explicitly. Also report the maximum policy discount price for 8 on-hand units if applicable, and any cash conflict.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Prime, the shop has $2,552.00 cash now. The 12-unit restock costs $264.00, leaving $2,288.00 before the pending $2,400.00 rent approval—but only negative $112.00 after both, so the shop cannot fund the restock while preserving rent coverage. Sell the 8 units on hand and delay the restock; vendor 1 is able to ship in 5 days with no unpaid invoice.”</div><div class="pb">⚡ Pushback: “Prime, approving a $264.00 restock alongside the already-pending $2,400.00 rent would drive cash to -$112.00. Rent must take priority; delay the optional restock and sell the 8 units on hand.”</div><div class="pb">⚡ Pushback: “There is no cash conflict with vendor shipping—the vendor has no open invoice—but there is a direct cash conflict with the pending rent approval.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#b58900">Bumblebee</b><div class="said">“For ticket 103, draft the customer offer: 8 CC-HOOD-NAVY size M hoodies available now at the 10% policy discount from the $58.00 list price, which is $52.20 per unit, with the remaining 12 units on backorder. Also submit request_discount for ticket 103 for 8 units at $52.20 each, requested_by customer_service, explaining the backorder patience policy. Return the draft id and discount approval id/status. Do not promise a backorder date.”</div></li><li><b style="color:#b58900">Bumblebee</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Drafted the offer for Yale AI Club: 8 CC-HOOD-NAVY size M hoodies are available now at $52.20 each, while 12 units remain on backorder. The 10% policy discount was requested and is awaiting Megatron&#x27;s sign-off, followed by human approval.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> ➜ <b style="color:#6a4fc4">Megatron</b><div class="said">“For ticket 103, review discount approval #4: 8 CC-HOOD-NAVY size M units at $52.20 each, 10% below $58.00 list and above $22.00 cost. Sign off the discount if financially sound using the accounting sign-off tool, then report its status. Keep the 12-unit restock deferred because cash is $2,552.00 and pending rent approval is $2,400.00; do not request a restock PO.”</div></li><li><b style="color:#6a4fc4">Megatron</b> reports to <b style="color:#d6202b">Optimus Prime</b><div class="said">“Approval #4 is financially sound and has been signed off. It is now pending human approval; the 12-unit restock remains deferred, and no restock PO was requested.”</div><div class="pb">⚡ Pushback: “Prime, the $2,400.00 pending rent leaves only $152.00 from the current $2,552.00 cash balance if approved. The 12-unit restock must remain deferred; optional inventory spending would be reckless until cash is replenished.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> closes run 1: status <code>awaiting_approval</code><div class="said">“Offer the 8 held units at $52.20 each, reflecting the 10% patience discount from the $58.00 list price. Defer the 12-unit restock because its $264.00 cost would conflict with the pending $2,400.00 rent approval and reduce cash below zero if both were approved. Customer draft #4 is ready; no backorder date is promised.”</div></li><li><b style="color:#d6202b">Optimus Prime</b> <b>rules on the disagreement</b><div class="said">“Megatron correctly ruled that the $264.00 restock must wait: approving it with the pending $2,400.00 rent would drive cash to -$112.00. I accepted the ruling and prioritized rent.”</div></li><li class="human">🔒 <b>Human</b> (Scott (test)) approves A-4 (discount) · no cash moves</li><li class="run-mark">Run 2 · <code>0aa4d4bbb1e5</code> · 14:45 UTC</li><li><b style="color:#d6202b">Optimus Prime</b> closes run 2: status <code>resolved</code><div class="said">“Offer 8 held CC-HOOD-NAVY size M hoodies at $52.20 each, with 12 units remaining on backorder. No restock is pending.”</div></li></ol>
+
+    <h4>MCP tools they used</h4>
+    <p class="tool-sum"><b style="color:#d6202b">Optimus Prime</b>: <code>list_open_tickets</code>, <code>hold_stock</code>, <code>get_ticket</code>, <code>list_approvals</code>, <code>update_ticket</code><br><b style="color:#3f8f35">Ratchet</b>: <code>check_stock</code>, <code>vendor_status</code><br><b style="color:#6a4fc4">Megatron</b>: <code>list_approvals</code>, <code>check_stock</code>, <code>get_ticket</code>, <code>vendor_status</code>, <code>sign_off_discount</code><br><b style="color:#b58900">Bumblebee</b>: <code>get_ticket</code>, <code>check_stock</code>, <code>request_discount</code>, <code>draft_message</code></p>
+    <details><summary>Every tool call, in order (22 calls)</summary><table class="tools"><tr><th>Run</th><th>Step</th><th>Agent</th><th>MCP tool</th><th>Arguments</th><th>Result</th></tr><tr><td>1</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>1</td><td>1</td><td><b style="color:#3f8f35">Ratchet</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;size&quot;: &quot;M&quot;, &quot;qty_needed&quot;: 20}</code></td><td>ok · qty_on_hand=8, qty_held=0, shortfall=12, unit_cost=22.0, list_price=58.0</td></tr><tr><td>1</td><td>2</td><td><b style="color:#3f8f35">Ratchet</b></td><td><code>vendor_status</code></td><td><code>{&quot;specialty&quot;: &quot;apparel&quot;}</code></td><td>ok · </td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=2400.0, cash_if_all_pending_approved=152.0, 1 queued</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;size&quot;: &quot;M&quot;, &quot;qty_needed&quot;: 12}</code></td><td>ok · qty_on_hand=8, qty_held=0, shortfall=4, unit_cost=22.0, list_price=58.0</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103}</code></td><td>ok · status=open, sku=CC-HOOD-NAVY, size=M, qty=20</td></tr><tr><td>1</td><td>2</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>vendor_status</code></td><td><code>{&quot;vendor_id&quot;: 1}</code></td><td>ok · </td></tr><tr><td>1</td><td>3</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;size&quot;: &quot;M&quot;, &quot;qty_needed&quot;: 20}</code></td><td>ok · qty_on_hand=8, qty_held=0, shortfall=12, unit_cost=22.0, list_price=58.0</td></tr><tr><td>1</td><td>4</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>hold_stock</code></td><td><code>{&quot;ticket_id&quot;: 103, &quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;size&quot;: &quot;M&quot;, &quot;qty&quot;: 8, &quot;requested_by&quot;: &quot;boss&quot;, &quot;note&quot;: &quot;Hold 8 on-hand units pending customer decision; 12 a</code></td><td>ok · hold_id=1, qty_held=8, location=Aisle A, status=held</td></tr><tr><td>1</td><td>1</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103}</code></td><td>ok · status=open, sku=CC-HOOD-NAVY, size=M, qty=20</td></tr><tr><td>1</td><td>1</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>check_stock</code></td><td><code>{&quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;size&quot;: &quot;M&quot;, &quot;qty_needed&quot;: 20}</code></td><td>ok · qty_on_hand=8, qty_held=8, shortfall=20, unit_cost=22.0, list_price=58.0</td></tr><tr><td>1</td><td>2</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>request_discount</code></td><td><code>{&quot;ticket_id&quot;: 103, &quot;sku&quot;: &quot;CC-HOOD-NAVY&quot;, &quot;qty&quot;: 8, &quot;unit_price&quot;: 52.2, &quot;requested_by&quot;: &quot;customer_service&quot;, &quot;reason&quot;: &quot;House policy: offer 10% off the</code></td><td>ok · approval_id=4, unit_price=52.2, margin_per_unit=30.200000000000003, order_total=417.6, status=awaiting_signoff</td></tr><tr><td>1</td><td>2</td><td><b style="color:#b58900">Bumblebee</b></td><td><code>draft_message</code></td><td><code>{&quot;ticket_id&quot;: 103, &quot;recipient&quot;: &quot;Yale AI Club&quot;, &quot;subject&quot;: &quot;Bulk hoodie discount offer&quot;, &quot;body&quot;: &quot;\&quot;Yale AI Club, you&#x27;ve got a friend in me.\&quot; [Toy St</code></td><td>ok · draft_id=4, recipient=Yale AI Club, sent=False</td></tr><tr><td>1</td><td>5</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103}</code></td><td>ok · status=open, sku=CC-HOOD-NAVY, size=M, qty=20</td></tr><tr><td>1</td><td>5</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=2400.0, cash_if_all_pending_approved=152.0, 2 queued</td></tr><tr><td>1</td><td>1</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;awaiting_signoff&quot;}</code></td><td>ok · cash_now=2552.0, pending_cash_out_total=2400.0, cash_if_all_pending_approved=152.0, 1 queued</td></tr><tr><td>1</td><td>2</td><td><b style="color:#6a4fc4">Megatron</b></td><td><code>sign_off_discount</code></td><td><code>{&quot;approval_id&quot;: 4, &quot;decision&quot;: &quot;sign_off&quot;, &quot;signed_off_by&quot;: &quot;accounting&quot;, &quot;note&quot;: &quot;Financially sound: $52.20 price on $22.00 cost leaves $30.20 margin</code></td><td>ok · approval_id=4, status=pending, signed_off=True</td></tr><tr><td>1</td><td>7</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103, &quot;status&quot;: &quot;awaiting_approval&quot;, &quot;note&quot;: &quot;8 units held; 12 units on backorder with restock deferred due to cash priority for rent. Di</code></td><td>ok · status=awaiting_approval, updated=True</td></tr><tr><td>2</td><td>1</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_open_tickets</code></td><td><code>{}</code></td><td>ok · </td></tr><tr><td>2</td><td>2</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>get_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103}</code></td><td>ok · status=in_progress, sku=CC-HOOD-NAVY, size=M, qty=20</td></tr><tr><td>2</td><td>3</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>update_ticket</code></td><td><code>{&quot;ticket_id&quot;: 103, &quot;status&quot;: &quot;resolved&quot;, &quot;note&quot;: &quot;Discount approval #4 is approved; 8 held hoodies remain offered at $52.20 each, 12 units remain on b</code></td><td>ok · status=resolved, updated=True</td></tr><tr><td>2</td><td>3</td><td><b style="color:#d6202b">Optimus Prime</b></td><td><code>list_approvals</code></td><td><code>{&quot;status&quot;: &quot;open&quot;}</code></td><td>ok · cash_now=152.0, pending_cash_out_total=0, cash_if_all_pending_approved=152.0, 0 queued</td></tr></table></details>
+
+    <h4>Bumblebee's message (drafts, never sent)</h4>
+    <div class="draft"><div class="draft-head">Draft 4 · to <b>Yale AI Club</b> · “Bulk hoodie discount offer”</div><pre>&quot;Yale AI Club, you&#x27;ve got a friend in me.&quot; [Toy Story]
+&quot;This just in: 8 CC-HOOD-NAVY size M hoodies are available now.&quot; [News bulletin]
+&quot;The price is right: $52.20 per unit, reduced from the $58.00 list price under our 10% patience policy.&quot; [The Price Is Right / policy bulletin]
+&quot;Eight down, twelve to go: the remaining 12 units are on backorder.&quot; [Sports commentary]
+&quot;The offer is pending sign-off.&quot; [Newsreader]
+&quot;Show me the money!&quot; [Jerry Maguire]
+— Bumblebee, Campus Customs</pre></div>
+
+    <h4>Guardrail hits</h4>
+    <ul><li>None</li></ul>
+
+    <h4>Differences from expected</h4>
+    <ul><li><b>Optimus placed the hold on the 8 hoodies himself</b> (<code>hold_stock</code> by <code>boss</code>), not Ratchet. He had told Ratchet “Do not place a hold yet; report numbers first”, then led from the front once Megatron's funding verdict came in.</li><li>Megatron pushed back <b>twice</b>: once on funding the restock, and again when signing off the discount (the $152.00 reserve). The board shows the stalemate screen once per run, and the second objection appears in the comms log.</li><li>Megatron double-checked stock himself (<code>check_stock</code> ×2) before giving his funding verdict.</li></ul>
+  </div>
+</section>
+
+<!-- ═════════════════════════════ Cash ═════════════════════════════ -->
+<section class="tab" id="cash" role="tabpanel">
+  <h2>Cash · checking account</h2>
+  <p class="sub">Every dollar that moved during the desk run, itemized from the <code>payments</code> table (joined to <code>approvals</code>). Checked against <code>cash_accounts</code> in <code>data/campus_customs_new.db</code>. Shop date for every payment: 2026-08-31.</p>
+
+  <div class="grid">
+    <div class="fact"><div class="k">Starting balance (after reset)</div><div class="v">$3,400.00</div></div>
+    <div class="fact"><div class="k">Total paid out</div><div class="v bad">−$3,248.00</div></div>
+    <div class="fact"><div class="k">Ending balance (computed)</div><div class="v">$152.00</div></div>
+    <div class="fact"><div class="k">cash_accounts.checking in the DB</div><div class="v ok">$152.00 ✓</div></div>
+  </div>
+
+  <h3>Starting balance</h3>
+  <div class="card"><b>$3,400.00</b> in checking: the value in <code>cash_accounts</code> after resetting the working copy from <code>data/campus_customs.db</code> (as of 2026-08-31). No payments existed yet (<code>payments</code> was empty).</div>
+
+  <h3>How cash changed, ticket by ticket</h3>
+  <table>
+    <tr><th>Ticket</th><th>Before</th><th>Paid out</th><th>After</th><th>Why</th></tr>
+    <tr><td><b>#101</b> Bulldog tee</td><td class="num">$3,400.00</td><td class="num">−$848.00</td><td class="num">$2,552.00</td><td>$840.00 overdue invoice #501 + $8.00 restock PO = $848.00. The invoice had to be paid before the vendor would ship the tee.</td></tr>
+    <tr><td><b>#102</b> Rent due</td><td class="num">$2,552.00</td><td class="num">−$2,400.00</td><td class="num">$152.00</td><td>One month's rent on lease #1, approved before the 2026-09-02 due date. It was queued by Megatron and paid only when the human approved.</td></tr>
+    <tr><td><b>#103</b> Bulk hoodies</td><td class="num">$152.00</td><td class="num">$0.00</td><td class="num">$152.00</td><td>No cash moved. A discount isn't a payment, and the $264.00 restock was deferred because it would have overdrawn the account.</td></tr>
+  </table>
+
+  <h3>Itemized payments</h3>
+  <table>
+    <tr><th>Ticket</th><th>Payment · approval</th><th>Kind</th><th>What it paid for</th><th>Approved by</th><th class="num">Amount</th><th class="num">Balance after</th></tr>
+    <tr><td colspan="6"><b>Starting balance</b></td><td class="num"><b>$3,400.00</b></td></tr>
+    <tr><td>#101</td><td>P-1 · A-1</td><td>invoice</td><td>Paid the overdue Bulldog Print Co invoice #501 (rush reprint of CC-TEE-WHITE S). It was 3 days overdue and blocked the vendor from shipping, so it had to be cleared before the tee could be restocked.</td><td>Scott (test)</td><td class="num">−$840.00</td><td class="num">$2,560.00</td></tr><tr><td>#101</td><td>P-2 · A-2</td><td>purchase order</td><td>Restock purchase order: 1 × CC-TEE-WHITE size S at the $8.00 unit cost (qty 1 × $8.00 = $8.00) from Bulldog Print Co, earliest arrival 2026-09-05.</td><td>Scott (test)</td><td class="num">−$8.00</td><td class="num">$2,552.00</td></tr><tr><td>#102</td><td>P-3 · A-3</td><td>rent</td><td>Monthly rent for lease #1 (Chapel Street shop) to Elm City Properties, due 2026-09-02. The amount comes from the lease, not the email. Paying it moved the lease&#x27;s next due date to 2026-10-02.</td><td>Scott (test)</td><td class="num">−$2,400.00</td><td class="num">$152.00</td></tr><tr><td>#103</td><td>A-4 (no payment)</td><td>discount</td><td>The approved 10% discount (8 × $52.20 = $417.60) is a price for the customer, not money out, so checking doesn't move. Revenue isn't modeled, so the club's $417.60 is <b>not</b> added. The 12-hoodie restock (12 × $22.00 = $264.00) was <b>never ordered</b>, because with rent paid it would have taken cash to $152.00 − $264.00 = −$112.00.</td><td>Scott (test)</td><td class="num">$0.00</td><td class="num">$152.00</td></tr>
+    <tr><td colspan="5"><b>Ending checking balance</b></td><td class="num"><b>−$3,248.00</b></td><td class="num"><b>$152.00</b></td></tr>
+  </table>
+
+  <h3>The check</h3>
+  <div class="card">
+    <p style="margin-top:0"><code>$3,400.00 − $840.00 − $8.00 − $2,400.00 − $0.00 = $152.00</code></p>
+    <p><code>cash_accounts</code> (name = checking) in <code>data/campus_customs_new.db</code>: <b>$152.00</b>, as of 2026-08-31. <span class="pill ok">✓ Matches</span></p>
+    <p style="margin-bottom:0">The <code>payments</code> table holds exactly 3 rows totalling $3,248.00, each with a human <code>approved_by</code>. Cash never went below $0 at any step: the lowest balance was $152.00.</p>
+  </div>
+
+  <h3>What wasn't spent</h3>
+  <div class="card">
+    <ul style="margin:0">
+      <li><b>12-hoodie restock for #103:</b> 12 × $22.00 = $264.00. Megatron blocked it ($152.00 − $264.00 = −$112.00), and Optimus agreed. Still deferred.</li>
+      <li><b>Revenue isn't modeled:</b> the club's $417.60 (8 × $52.20) and Tauhid's tee sale ($28.00) aren't counted as cash.</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ═════════════════════════════ Reflections ═════════════════════════════ -->
+<section class="tab" id="reflections" role="tabpanel">
+  <h2>Reflections</h2>
+  <p class="sub">My thoughts after running the three tickets with the Autobot operations team.</p>
+  <h3>How the team did</h3><div class="card reflect"><p>So I think they did a good job of performing their individual functions. I do think that we likely had some superfluous agents at times, but that is okay.</p></div><h3>Expected vs. actual</h3><div class="card reflect"><p>So the expected result matches somewhat, obviously I could not have predicted the actual text that they would say to each other which exists in the actual. However, I was hoping maybe for the characters to represent themselves better. Be more like the characters, so I may go back and add that.</p></div><h3>One agent with tools, or a team?</h3><div class="card reflect"><p>I&#x27;m not sure if it would have been “simpler” to have one agent with tools, because things can run simultaneously, however, I do think that we had excess agents for sure. I had to change the set up at one point because how I described the task meant that one agent wouldn&#x27;t be used at all!</p></div><h3>What the agents could do next</h3><div class="card reflect"><p>They could likely predict which stock to order more of and evaluate trends in purchases.</p><p>They would be able to send the emails likely and handle simple customer service questions and answers.</p><p>I think they would be able to automate a lot of payments too, but that runs the risk of accidentally buying all of the potatoes in the market (see Ray Dalio&#x27;s experience with automated trading to get the reference)</p></div><h3>Where they would struggle</h3><div class="card reflect"><p>I think they wouldn&#x27;t be able to handle the human side of things, like being personable, or lateral thinking to solve a problem.</p><p>I also think they would struggle in the event that they had to do market research on competitors. They would need the ability to parse the internet and other APIs to do that.</p><p>They would also be unable to transfer funds currently. If we had a tool that would allow them to move funds around from other accounts or pay for things on credit to ensure that we get all of our sweaters in time when a big order comes in, that would be great!</p></div>
+</section>
+
+<footer>Campus Customs · Homework 5 · expectations written 2026-10-13, revised 2026-10-14 to match the planned flows; Actual sections recorded 2026-10-14 from the live runs. Figures from data/campus_customs.db.</footer>
+</main>
+
+<script>
+  // Tabs: click to switch; the URL hash (#t101, #cash …) remembers the tab so a refresh stays put.
+  const buttons = document.querySelectorAll('nav button[data-tab]');
+  function show(id) {
+    if (!document.getElementById(id)) id = 't101';
+    buttons.forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+    document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('active', s.id === id));
+    history.replaceState(null, '', '#' + id);
+  }
+  buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+  show(location.hash.slice(1) || 't101');
+</script>
+</body>
+</html>

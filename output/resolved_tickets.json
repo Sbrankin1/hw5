@@ -1,0 +1,373 @@
+{
+  "desk": "Campus Customs operations desk",
+  "shop_today": "2026-08-31",
+  "model": "gpt-5.6-luna via Portkey",
+  "database": "data/campus_customs_new.db",
+  "audit_trail": "output/audit_trail.json",
+  "starting_checking_balance": 3400.0,
+  "ending_checking_balance": 152.0,
+  "total_paid_out": 3248.0,
+  "tickets": [
+    {
+      "ticket_id": 101,
+      "type": "customer_order",
+      "requester": "Tauhid Zaman",
+      "subject": "Bulldog tee",
+      "final_status": "resolved",
+      "outcome": "Invoice #501 ($840.00, 3 days overdue) was paid so Bulldog Print Co could ship. Then 1 × CC-TEE-WHITE size S was restocked ($8.00 PO, earliest arrival 2026-09-05), and Tauhid Zaman was told it will be with him by 2026-09-05, not today.",
+      "agents_on_ticket": [
+        "Optimus Prime",
+        "Ratchet",
+        "Megatron",
+        "Bumblebee"
+      ],
+      "agents_not_needed": [
+        "Ironhide"
+      ],
+      "agent_contributions": [
+        {
+          "agent": "boss",
+          "persona": "Optimus Prime",
+          "contribution": "Ticket 101 is resolved. Invoice 501 is paid, vendor 1 can ship, and the approved restock covers 1 CC-TEE-WHITE size S with expected arrival 2026-09-05. The restock proceeds under approved purchase order 2. Corrected customer draft 2 is ready for human review and sending.",
+          "all_reports": [
+            "A vendor invoice blocks the Bulldog tee restock. Megatron queued payment approval 1 for invoice 501; the vendor cannot ship until payment is approved and confirmed. Wait for human approval of payment approval 1. After approval, confirm invoice 501 is closed and vendor 1 can_ship is true, then restock CC-TEE-WHITE size S quantity 1. No customer date is promised yet.",
+            "Invoice 501 is paid and vendor 1 can ship. A purchase order for 1 CC-TEE-WHITE size S is pending human approval. Customer draft 1 is on the board. Human approval is required for purchase-order approval 2: 1 CC-TEE-WHITE size S at $8.00, with expected arrival 2026-09-05. Draft 1 is ready for human review.",
+            "Ticket 101 is resolved. Invoice 501 is paid, vendor 1 can ship, and the approved restock covers 1 CC-TEE-WHITE size S with expected arrival 2026-09-05. The restock proceeds under approved purchase order 2. Corrected customer draft 2 is ready for human review and sending."
+          ],
+          "tools_used": [
+            "list_open_tickets",
+            "get_ticket",
+            "update_ticket",
+            "list_approvals",
+            "vendor_status",
+            "check_stock"
+          ],
+          "delegated_to": [
+            "Megatron",
+            "Ratchet",
+            "Bumblebee"
+          ]
+        },
+        {
+          "agent": "inventory",
+          "persona": "Ratchet",
+          "contribution": "Aisle B was flatlining: 1 unit of CC-TEE-WHITE, size S, was short. Vendor 1, Bulldog Print Co, can ship; I queued the restock for human approval. The returned purchase-order approval ID is 2; no separate PO ID was provided by the tool.",
+          "all_reports": [
+            "Aisle B was flatlining: 1 unit of CC-TEE-WHITE, size S, was short. Vendor 1, Bulldog Print Co, can ship; I queued the restock for human approval. The returned purchase-order approval ID is 2; no separate PO ID was provided by the tool."
+          ],
+          "tools_used": [
+            "check_stock",
+            "vendor_status",
+            "draft_purchase_order"
+          ]
+        },
+        {
+          "agent": "accounting",
+          "persona": "Megatron",
+          "contribution": "Invoice 501 is confirmed paid: vendor 1 has no open invoices, a $0 open balance, and can_ship=true. Ticket 101 has no remaining pending approval or cash outflow; its approved purchase order is already recorded as paid, and the shop has $2,552.00 cash with $0.00 pending approval outflow.",
+          "all_reports": [
+            "Invoice 501 is an unpaid, overdue restock invoice for Bulldog Print Co and is blocking shipment. I queued its $840.00 payment for human approval; nothing has been paid, and the vendor currently cannot ship.",
+            "Invoice 501 is confirmed paid: vendor 1 has no open invoices and can ship. No additional payment was requested.",
+            "Invoice 501 is confirmed paid: vendor 1 has no open invoices, a $0 open balance, and can_ship=true. Ticket 101 has no remaining pending approval or cash outflow; its approved purchase order is already recorded as paid, and the shop has $2,552.00 cash with $0.00 pending approval outflow."
+          ],
+          "tools_used": [
+            "get_ticket",
+            "list_approvals",
+            "vendor_status",
+            "request_payment"
+          ]
+        },
+        {
+          "agent": "customer_service",
+          "persona": "Bumblebee",
+          "contribution": "\"This just in: the corrected draft is saved.\" [News bulletin] \"Draft ID 2.\" [News bulletin]",
+          "all_reports": [
+            "\"Mission accomplished.\" [Newsreader phrase] The warm restock update is drafted for Tauhid Zaman, including the expected arrival date and the pending human approval. \"The show must go on.\" [Proverb]",
+            "\"This just in: the corrected draft is saved.\" [News bulletin] \"Draft ID 2.\" [News bulletin]"
+          ],
+          "tools_used": [
+            "get_ticket",
+            "draft_message"
+          ]
+        }
+      ],
+      "human_approvals": [
+        {
+          "approval_id": 1,
+          "kind": "invoice",
+          "amount": 840.0,
+          "details": "Pay invoice #501 (vendor 1): Rush reprint CC-TEE-WHITE S. Overdue restock invoice for CC-TEE-WHITE S; payment is required to unblock Bulldog Print Co shipment for customer order ticket 101.",
+          "requested_by": "Megatron",
+          "signed_off_by": null,
+          "status": "approved",
+          "approved_by": "Scott (test)",
+          "decided_at": "2026-08-31",
+          "payment_id": 1
+        },
+        {
+          "approval_id": 2,
+          "kind": "purchase_order",
+          "amount": 8.0,
+          "details": "PO to Bulldog Print Co: 1 x CC-TEE-WHITE size S at $8.00 = $8.00; lead 5 days, earliest arrival 2026-09-05. Restock shortfall for ticket 101 after vendor invoice 501 was paid and vendor can_ship is true.",
+          "requested_by": "Ratchet",
+          "signed_off_by": null,
+          "status": "approved",
+          "approved_by": "Scott (test)",
+          "decided_at": "2026-08-31",
+          "payment_id": 2
+        }
+      ],
+      "cash_change": -848.0,
+      "drafts": [
+        {
+          "draft_id": 1,
+          "to": "Tauhid Zaman",
+          "subject": "Update on your CC-TEE-WHITE size S restock",
+          "body": "\"Tauhid Zaman, here's looking at you, kid.\" [Casablanca]\n📻 \"This just in: the vendor invoice has been paid, and CC-TEE-WHITE, size S, is being restocked.\" [News bulletin]\n📻 \"Expected arrival: September 5, 2026.\" [News bulletin]\n\"The best is yet to come.\" [Frank Sinatra interview catchphrase]\n📻 \"The restock purchase order still requires human approval.\" [News bulletin]\n\"Patience is a virtue.\" [Proverb]\n\"We'll be back.\" [The Terminator]\n— Bumblebee, Campus Customs",
+          "sent": false
+        },
+        {
+          "draft_id": 2,
+          "to": "Tauhid Zaman",
+          "subject": "Corrected update on your CC-TEE-WHITE size S restock",
+          "body": "\"Tauhid Zaman, here's looking at you, kid.\" [Casablanca]\n📻 \"This just in: your restock is approved.\" [News bulletin]\n📻 \"CC-TEE-WHITE, size S, quantity 1, is expected to arrive on 2026-09-05.\" [News bulletin]\n\"Patience is a virtue.\" [Proverb]\n\"The best is yet to come.\" [Frank Sinatra interview catchphrase]\n— Bumblebee, Campus Customs",
+          "sent": false
+        }
+      ],
+      "runs": [
+        "046dfb105104",
+        "f91bcf52ad0c",
+        "a487ef0f3acc"
+      ]
+    },
+    {
+      "ticket_id": 102,
+      "type": "rent_notice",
+      "requester": "Elm City Properties",
+      "subject": "Rent due",
+      "final_status": "resolved",
+      "outcome": "Megatron confirmed $2,400.00 rent on lease #1 is due 2026-09-02 and queued it without paying it. Bumblebee told Elm City Properties it will be paid on time. After the human approved it, the rent was paid and the lease rolled to next due 2026-10-02.",
+      "agents_on_ticket": [
+        "Optimus Prime",
+        "Megatron",
+        "Bumblebee"
+      ],
+      "agents_not_needed": [
+        "Ratchet",
+        "Ironhide"
+      ],
+      "agent_contributions": [
+        {
+          "agent": "boss",
+          "persona": "Optimus Prime",
+          "contribution": "Rent approval #3 was approved, and the landlord draft is ready. Lease status confirms the next due date is 2026-10-02. Close ticket 102. No approval remains pending, and no further desk action is pending.",
+          "all_reports": [
+            "Rent approval #3 is queued for lease #1. The landlord has a draft stating the $2,400.00 rent will be paid on time by 2026-09-02. It has not been paid. Keep ticket 102 awaiting human approval. Approve payment #3 before 2026-09-02; no payment is recorded in this run. The landlord draft is ready for human review and sending.",
+            "Rent approval #3 remains pending. Cash is sufficient today, and the landlord draft is ready. Keep ticket 102 awaiting human approval. Rent payment approval #3 is for $2,400.00, due 2026-09-02. The landlord draft says it will be paid by 2026-09-02; it does not claim payment. Ticket 103 was reviewed for cross-ticket cash context but was not acted on.",
+            "Rent approval #3 was approved, and the landlord draft is ready. Lease status confirms the next due date is 2026-10-02. Close ticket 102. No approval remains pending, and no further desk action is pending."
+          ],
+          "tools_used": [
+            "list_open_tickets",
+            "get_ticket",
+            "update_ticket",
+            "lease_and_cash_status",
+            "list_approvals"
+          ],
+          "delegated_to": [
+            "Megatron",
+            "Bumblebee"
+          ],
+          "disagreements_settled": [
+            "Megatron advised delaying optional purchases because rent approval #3 would reduce cash from $2,552.00 to $152.00. I ruled that rent takes priority and optional spending waits until cash recovers."
+          ]
+        },
+        {
+          "agent": "accounting",
+          "persona": "Megatron",
+          "contribution": "Prime, the lease terms are recorded and rent approval is queued. Approval #3 is pending human approval; nothing has been paid. The ledger will retain only $152.00 if this rent clears—an exquisitely thin reserve, so I oppose optional spending until cash is replenished.",
+          "all_reports": [
+            "Prime, the lease terms are recorded and rent approval is queued. Approval #3 is pending human approval; nothing has been paid. The ledger will retain only $152.00 if this rent clears—an exquisitely thin reserve, so I oppose optional spending until cash is replenished."
+          ],
+          "tools_used": [
+            "lease_and_cash_status",
+            "list_approvals",
+            "request_payment"
+          ],
+          "pushback": [
+            "This $2,400.00 obligation consumes nearly all current cash and leaves $152.00 if approved. Delay every optional purchase or restock until funds recover; rent is due in 2 days and must not be sacrificed, but the Autobots should not mistake a $152.00 reserve for operating capital."
+          ]
+        },
+        {
+          "agent": "customer_service",
+          "persona": "Bumblebee",
+          "contribution": "\"Mission accomplished.\" [News bulletin] \"And now, the rest of the story.\" [News sign-off]",
+          "all_reports": [
+            "\"Mission accomplished.\" [News bulletin] \"And now, the rest of the story.\" [News sign-off]"
+          ],
+          "tools_used": [
+            "get_ticket",
+            "draft_message"
+          ]
+        }
+      ],
+      "human_approvals": [
+        {
+          "approval_id": 3,
+          "kind": "rent",
+          "amount": 2400.0,
+          "details": "Pay rent for lease #1 (Chapel Street shop) due 2026-09-02 to Elm City Properties. Rent due 2026-09-02 for Chapel Street shop; queued for human approval.",
+          "requested_by": "Megatron",
+          "signed_off_by": null,
+          "status": "approved",
+          "approved_by": "Scott (test)",
+          "decided_at": "2026-08-31",
+          "payment_id": 3
+        }
+      ],
+      "cash_change": -2400.0,
+      "drafts": [
+        {
+          "draft_id": 3,
+          "to": "Elm City Properties",
+          "subject": "Rent payment for lease 1",
+          "body": "📻 \"This just in, Elm City Properties.\" [News bulletin]\n📻 \"The rent of $2,400.00 will be paid on time by 2026-09-02.\" [News bulletin]\n\"And now, back to you.\" [News sign-off]\n\n— Bumblebee, Campus Customs",
+          "sent": false
+        }
+      ],
+      "runs": [
+        "f84692ce9a3d",
+        "473f738feec1",
+        "cb785502ccb2"
+      ]
+    },
+    {
+      "ticket_id": 103,
+      "type": "price_override",
+      "requester": "Yale AI Club",
+      "subject": "Bulk hoodie discount",
+      "final_status": "resolved",
+      "outcome": "Ratchet found 8 of 20 hoodies (12 short). Megatron pushed back because the $264.00 restock would take cash to −$112.00 with rent pending, and Optimus agreed. Bumblebee suggested 10% off the 8 on hand ($52.20 each, $417.60) as a thank-you for patience; Megatron signed it off and the human approved it. The 8 are held pending dispatch, and the 12 are on backorder with no restock ordered.",
+      "agents_on_ticket": [
+        "Optimus Prime",
+        "Ratchet",
+        "Megatron",
+        "Bumblebee"
+      ],
+      "agents_not_needed": [
+        "Ironhide"
+      ],
+      "agent_contributions": [
+        {
+          "agent": "boss",
+          "persona": "Optimus Prime",
+          "contribution": "Ticket 103 is resolved. Approval #4 is approved, and customer draft #4 is ready. Offer 8 held CC-HOOD-NAVY size M hoodies at $52.20 each, with 12 units remaining on backorder. No restock is pending.",
+          "all_reports": [
+            "Ratchet found 8 of 20 CC-HOOD-NAVY size M hoodies available. Eight are held. The remaining 12 are on backorder, and discount approval #4 awaits human approval. Offer the 8 held units at $52.20 each, reflecting the 10% patience discount from the $58.00 list price. Defer the 12-unit restock because its $264.00 cost would conflict with the pending $2,400.00 rent approval and reduce cash below zero if both were approved. Customer draft #4 is ready; no backorder date is promised.",
+            "Ticket 103 is resolved. Approval #4 is approved, and customer draft #4 is ready. Offer 8 held CC-HOOD-NAVY size M hoodies at $52.20 each, with 12 units remaining on backorder. No restock is pending."
+          ],
+          "tools_used": [
+            "list_open_tickets",
+            "hold_stock",
+            "get_ticket",
+            "list_approvals",
+            "update_ticket"
+          ],
+          "delegated_to": [
+            "Ratchet",
+            "Megatron",
+            "Bumblebee"
+          ],
+          "disagreements_settled": [
+            "Megatron correctly ruled that the $264.00 restock must wait: approving it with the pending $2,400.00 rent would drive cash to -$112.00. I accepted the ruling and prioritized rent."
+          ]
+        },
+        {
+          "agent": "inventory",
+          "persona": "Ratchet",
+          "contribution": "The shelf has 8 of 20 requested hoodies, so 12 are short. The 8 available units can be held, but I did not place a hold; the matched apparel vendor can ship with a 5-day lead time.",
+          "all_reports": [
+            "The shelf has 8 of 20 requested hoodies, so 12 are short. The 8 available units can be held, but I did not place a hold; the matched apparel vendor can ship with a 5-day lead time."
+          ],
+          "tools_used": [
+            "check_stock",
+            "vendor_status"
+          ]
+        },
+        {
+          "agent": "accounting",
+          "persona": "Megatron",
+          "contribution": "Approval #4 is financially sound and has been signed off. It is now pending human approval; the 12-unit restock remains deferred, and no restock PO was requested.",
+          "all_reports": [
+            "Prime, the shop has $2,552.00 cash now. The 12-unit restock costs $264.00, leaving $2,288.00 before the pending $2,400.00 rent approval—but only negative $112.00 after both, so the shop cannot fund the restock while preserving rent coverage. Sell the 8 units on hand and delay the restock; vendor 1 is able to ship in 5 days with no unpaid invoice.",
+            "Approval #4 is financially sound and has been signed off. It is now pending human approval; the 12-unit restock remains deferred, and no restock PO was requested."
+          ],
+          "tools_used": [
+            "list_approvals",
+            "check_stock",
+            "get_ticket",
+            "vendor_status",
+            "sign_off_discount"
+          ],
+          "pushback": [
+            "Prime, approving a $264.00 restock alongside the already-pending $2,400.00 rent would drive cash to -$112.00. Rent must take priority; delay the optional restock and sell the 8 units on hand.",
+            "There is no cash conflict with vendor shipping—the vendor has no open invoice—but there is a direct cash conflict with the pending rent approval.",
+            "Prime, the $2,400.00 pending rent leaves only $152.00 from the current $2,552.00 cash balance if approved. The 12-unit restock must remain deferred; optional inventory spending would be reckless until cash is replenished."
+          ]
+        },
+        {
+          "agent": "customer_service",
+          "persona": "Bumblebee",
+          "contribution": "Drafted the offer for Yale AI Club: 8 CC-HOOD-NAVY size M hoodies are available now at $52.20 each, while 12 units remain on backorder. The 10% policy discount was requested and is awaiting Megatron's sign-off, followed by human approval.",
+          "all_reports": [
+            "Drafted the offer for Yale AI Club: 8 CC-HOOD-NAVY size M hoodies are available now at $52.20 each, while 12 units remain on backorder. The 10% policy discount was requested and is awaiting Megatron's sign-off, followed by human approval."
+          ],
+          "tools_used": [
+            "get_ticket",
+            "check_stock",
+            "request_discount",
+            "draft_message"
+          ]
+        }
+      ],
+      "human_approvals": [
+        {
+          "approval_id": 4,
+          "kind": "discount",
+          "amount": 0.0,
+          "details": "8 x CC-HOOD-NAVY at $52.20 (list $58.00, 10% off; margin $30.20/unit, 58%). House policy: offer 10% off the 8 units available now as a thank-you for the customer's patience with the 12-unit backorder. Megatron: Financially sound: $52.20 price on $22.00 cost leaves $30.20 margin per unit, 58% margin; 8-unit order totals $417.60. Sign-off is appropriate, while the 12-unit restock remains deferred.",
+          "requested_by": "Bumblebee",
+          "signed_off_by": "Megatron",
+          "status": "approved",
+          "approved_by": "Scott (test)",
+          "decided_at": "2026-08-31",
+          "payment_id": null
+        }
+      ],
+      "cash_change": 0,
+      "drafts": [
+        {
+          "draft_id": 4,
+          "to": "Yale AI Club",
+          "subject": "Bulk hoodie discount offer",
+          "body": "\"Yale AI Club, you've got a friend in me.\" [Toy Story]\n\"This just in: 8 CC-HOOD-NAVY size M hoodies are available now.\" [News bulletin]\n\"The price is right: $52.20 per unit, reduced from the $58.00 list price under our 10% patience policy.\" [The Price Is Right / policy bulletin]\n\"Eight down, twelve to go: the remaining 12 units are on backorder.\" [Sports commentary]\n\"The offer is pending sign-off.\" [Newsreader]\n\"Show me the money!\" [Jerry Maguire]\n— Bumblebee, Campus Customs",
+          "sent": false
+        }
+      ],
+      "stock_holds": [
+        {
+          "id": 1,
+          "sku": "CC-HOOD-NAVY",
+          "size": "M",
+          "qty": 8,
+          "status": "held",
+          "held_by": "boss",
+          "note": "Hold 8 on-hand units pending customer decision; 12 additional units remain on backorder."
+        }
+      ],
+      "runs": [
+        "4c1f3ac83e00",
+        "0aa4d4bbb1e5"
+      ]
+    }
+  ]
+}
