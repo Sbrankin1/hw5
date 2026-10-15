@@ -397,7 +397,7 @@ h1, h2, h3 { margin: 0; }
 .footer { margin-top: 30px; text-align: center; font-size: 12px; color: var(--muted); }
 
 /* ── Stalemate: Optimus vs. Megatron ─────────────────────────────────── */
-.stalemate { position: fixed; inset: 0; z-index: 100; background: #05060f; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; animation: fadeIn 0.25s; cursor: pointer; }
+.stalemate { position: fixed; inset: 0; z-index: 100; background: #05060f; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; animation: fadeIn 0.25s; cursor: pointer; }
 .sm-half { position: absolute; top: 0; bottom: 0; width: 50%; }
 .sm-left { left: 0; background: linear-gradient(90deg, #3a0306, #8e1b1f 60%, rgba(214, 32, 43, 0.6)); animation: pushL 0.9s ease-in-out infinite alternate; }
 .sm-right { right: 0; background: linear-gradient(270deg, #120826, #3d2580 60%, rgba(155, 123, 224, 0.6)); animation: pushR 0.9s ease-in-out infinite alternate; }
@@ -433,14 +433,14 @@ h1, h2, h3 { margin: 0; }
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 90; width: min(760px, 92vw);
   display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 16px;
   background: linear-gradient(100deg, rgba(142, 27, 31, 0.95), rgba(0, 53, 107, 0.95)); border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55); animation: riseIn 0.5s cubic-bezier(.2, 1.3, .4, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55); animation: riseIn 0.5s cubic-bezier(.2, 1.3, .4, 1); color: #fff;
 }
 .ruling-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: #ffd9db; }
 .ruling-body p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; }
 .ruling-body { flex: 1; }
 
 /* Roll-out splash */
-.rollout { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(2, 8, 20, 0.82); animation: fadeOut 2.6s forwards; }
+.rollout { position: fixed; inset: 0; z-index: 95; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(2, 8, 20, 0.82); animation: fadeOut 2.6s forwards; }
 .rollout-streaks {
   position: absolute; inset: 0;
   background: repeating-linear-gradient(100deg, transparent 0 40px, rgba(214, 32, 43, 0.25) 40px 44px, transparent 44px 90px, rgba(99, 170, 218, 0.22) 90px 93px);

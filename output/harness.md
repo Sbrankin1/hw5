@@ -387,13 +387,22 @@ A React + Vite + TypeScript board, **Transformers × Yale** themed. Start it wit
 
 ## Results of the desk run
 
-All three tickets were **resolved** in the live desk session on 2026-10-14 (8 runs, 14:22–14:46 UTC, with 4 human approvals). `output/audit_trail.json` holds those 8 runs plus one later run (`92718feb2829`, 15:37 UTC): the first step of #101 again, on a freshly reset DB. The working DB `data/campus_customs_new.db` holds the end state of the 8-run session.
+All three tickets were **resolved** in the **final desk session**: 2026-10-14, 23:48–23:57 UTC, 7 runs, with the in-character voices, and every human approval made by **Scott** on the dashboard.
 
-| Ticket | Crew | Human approvals | Cash |
-|---|---|---|---|
-| #101 Bulldog tee | Optimus, Megatron, Ratchet, Bumblebee | A-1 invoice #501 $840.00 · A-2 PO $8.00 | −$848.00 |
-| #102 Rent due | Optimus, Megatron, Bumblebee | A-3 rent $2,400.00 | −$2,400.00 |
-| #103 Bulk hoodies | Optimus, Ratchet, Megatron, Bumblebee | A-4 discount (8 × $52.20, signed off by Megatron) | $0.00 |
+| Ticket | Runs | Crew | Human approvals | Cash |
+|---|---|---|---|---|
+| #101 Bulldog tee | `d6b31a01a0a6`, `713aae5e78d6`, `0079f604af42` | Optimus, Megatron, Ratchet, Bumblebee | A-1 invoice #501 $840.00 · A-2 PO $8.00 | −$848.00 |
+| #102 Rent due | `bf0f7ef69aaa`, `40df6c145627` | Optimus, Megatron, Bumblebee | A-3 rent $2,400.00 | −$2,400.00 |
+| #103 Bulk hoodies | `9b5fe957ecca`, `b25a465e6b2f` | Optimus, Ratchet, Megatron, Bumblebee | A-4 discount ($54.00 a hoodie, queued by Megatron) | $0.00 |
 
-Checking: **$3,400.00 → $152.00** (−$3,248.00 across 3 payments), matching `cash_accounts`. Details: `output/desk_tickets.html` (expected vs. actual, Cash tab), `output/resolved_tickets.json`, and `output/resolved_board.html` (dashboard screenshots).
+Checking: **$3,400.00 → $152.00** (−$3,248.00 across 3 payments), matching `cash_accounts` in `data/campus_customs_new.db`.
+
+**`output/audit_trail.json` is append-only and holds every real run**, 16 in total: the 7 runs of the final session above; 8 earlier runs from the first live session (14:22–14:46 UTC, before the in-character voices, which also resolved all three tickets); and one first step of #101 (15:37 UTC) on a reset DB. Each run is identified by its `run_id`. The working DB holds the end state of the final session.
+
+**Where the final session differed from the plan** (details in `desk_tickets.html`):
+- On #103, Megatron set the discount himself at $54.00 (about 7% off) for 20 units, rather than Bumblebee suggesting the 10% house policy ($52.20) on the 8 on hand.
+- Optimus placed the hold on the 8 hoodies himself.
+- Bumblebee's landlord note included the idiom "The check is in the mail".
+
+Full write-up: `output/desk_tickets.html` (expected vs. actual, Cash and Reflections tabs), `output/resolved_tickets.json`, and `output/resolved_board.html` (dashboard screenshots).
 

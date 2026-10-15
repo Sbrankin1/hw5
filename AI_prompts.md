@@ -368,7 +368,7 @@
 > They would also be unable to transfer funds currently. If we had a tool that would allow them to move funds around from other accounts or pay for things on credit to ensure that we get all of our sweaters in time when a big order comes in, that would be great!
 
 ### Prompt 2
-> So like I mentioned in my notes, I want you to make sure the characters themselves really come across in their interactions, I want optimus to feel like he really embodies the chracter, the same with megatron! For example, megatron would HATE having to wait for human approval, that should be reflected in the voice of his chracter in the interactions!
+> So like I mentioned in my notes, I want you to make sure the characters themselves really come across in their interactions, I want optimus to feel like he really embodies the character, the same with megatron! For example, megatron would HATE having to wait for human approval, that should be reflected in the voice of his character in the interactions!
 >
 > Also fix the Dalio spelling thank you!
 
@@ -385,7 +385,7 @@
 
 ### Prompt 1
 > Problem 11: Submit to Github
-> ush the code to a public  github repository so that it can be graded and evaluated. do not push the real .env but DO include both database files under data/
+> push the code to a public github repository so that it can be graded and evaluated. do not push the real .env but DO include both database files under data/
 > and again, we should be following this layout!
 >
 > Also, before we submit, make sure you go through the feedback from hw1 and hw2 so that we know we have covered all the bases!
@@ -393,7 +393,7 @@
 > *[Attached: the expected hw5/ file layout, and the README requirements: copy the original DB to the working copy for a clean run, start the MCP server, start the FastAPI backend, start the React board, reset the DB before a full three-ticket run]*
 
 ### Prompt 2
-> I also got 100% on hw 3  which used this layout, maybe go back and just think about how you ensured that you hit al the points for that in the other homework, naturally they are totally different projects and you should be using the earlier layout and such, but yeah, make sure it is good!
+> I also got 100% on hw 3  which used this layout, maybe go back and just think about how you ensured that you hit all the points for that in the other homework, naturally they are totally different projects and you should be using the earlier layout and such, but yeah, make sure it is good!
 >
 > *[Attached: the hw3/ expected layout, for reference]*
 
@@ -410,3 +410,26 @@
 10. *Every import is in `requirements.txt` (checked with a fresh venv), the frontend builds with 0 errors, and the docs use American spelling.*
 
 *`data/campus_customs_new.db` was removed from `.gitignore` so both databases are pushed. The README was restructured around the five required steps.*
+
+### Prompt 3
+> okay launch it so I can do the approvals and such, and also fix the typos
+
+*Why this follow-up was needed: the recorded runs came from before the character-voice upgrade, and their approvals were clicked by the vibe coder in testing ("Scott (test)"). So the user chose to re-run all three tickets with the new voices and approve as themselves. The previous recorded state was backed up, the DB was reset to the original, and the dashboard was launched. The typos flagged in this problem's prompts ("ush" → "push", "chracter" → "character", "al" → "all") were corrected in this log.*
+
+### Prompt 4
+> okay done!
+
+*Why this follow-up was needed: the user finished the new desk run on the dashboard (7 runs, 23:48–23:57 UTC, every approval by Scott). Everything was then re-recorded from that session:*
+- *the Actual sections of `desk_tickets.html`, now with each agent's in-character lines next to the plain record;*
+- *the Cash tab: $3,400.00 → $152.00, checked against `cash_accounts`;*
+- *`resolved_tickets.json`;*
+- *`resolved_board.html`, with 9 new screenshots, including the stalemate and Prime's ruling;*
+- *the results section of `harness.md`.*
+
+*Deviations from the plan were recorded honestly:*
+- *Megatron set a $54.00 discount for 20 units himself, instead of Bumblebee's 10% on 8.*
+- *Optimus held the hoodies himself.*
+- *Bumblebee's landlord note said "The check is in the mail".*
+- *Bumblebee used a song lyric in a report.*
+
+*While capturing the stalemate, a bug turned up: in the light theme its text had become dark on dark. It was fixed by giving the full-screen moments their own white text.*
