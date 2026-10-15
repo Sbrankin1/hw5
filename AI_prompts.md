@@ -450,3 +450,26 @@
 
 *Why this follow-up was needed: the user asked for an honest final assessment before handing it in. A last check found one prompt ("Launch the dashboard", Problem 8) that had never been logged. It was added under Problem 8, and the repository was updated.*
 
+
+### Prompt 7
+> Hmmm..put the rent acknowledgement through ironhide, and then have him talk to megatron to get it resolved. Have them be very combative, since I think they hate each other in the movies
+
+*Why this follow-up was needed: Ironhide had never worked a ticket, one of the weak points named in the final assessment. The rent playbook is now Optimus → **Ironhide** (acknowledges the notice and checks the lease) → **Megatron** (queues the rent, unpaid) → Bumblebee (landlord note). Ironhide and Megatron are written as sworn enemies who trade insults, but the numbers must stay exact and neither may block the payment.*
+
+*To make sure agents answer whoever actually handed them a task, each one is now told who that was. Megatron's `request_discount` tool was also removed, so a backorder discount can only come from Bumblebee at exactly 10% on the on-hand units, with Megatron signing it off. This fixes the #103 deviation from the last run.*
+
+*A live scratch test of #102 showed the feud working, with all figures exact. Ironhide: "Megatron, bucket-head, the Chapel Street base does not belong to you to ransom." Megatron: "Ironhide, the Autobots' blunt instrument, your little fortress remains standing by the grace of my ledger." The desk was then reset for the user's re-run, and the 102 expectations were updated to the revised plan.*
+
+### Prompt 8
+> okay mission 2 is done! feel free to log it since it is the only one that involves it
+
+*Why this follow-up was needed: the user re-ran only #102, the one ticket the Ironhide change affects, on a freshly reset DB: 2 runs, the rent approved by Scott. It was recorded as the **revised #102 run**:*
+- *the main Actual section on the 102 tab;*
+- *a `revised_run` entry in `resolved_tickets.json`;*
+- *4 new screenshots on `resolved_board.html` (the Ironhide ➜ Megatron beam, both insults, and the debrief);*
+- *a note in `harness.md`.*
+
+*Because it ran standalone, the working DB was restored to the full desk session's final state, so the Cash tab still matches `cash_accounts` at $152.00. The run also exposed a bug: the rent approval was saved with `ticket_id: null`. `request_payment` and `draft_purchase_order` now require a valid ticket id.*
+
+### Prompt 9
+> as soon as this is done, I want you to push the update to github

@@ -89,8 +89,9 @@ AGENT_TOOLS: dict[AgentName, set[str]] = {
                     "request_payment", "request_discount", "draft_purchase_order", "draft_message",
                     "hold_stock"},
     "inventory": READ | {"check_stock", "vendor_status", "draft_purchase_order", "hold_stock"},
+    # Megatron signs discounts off but never prices them: only Bumblebee (or Prime) suggests one.
     "accounting": READ | {"check_stock", "vendor_status", "lease_and_cash_status",
-                          "request_payment", "request_discount", "list_approvals", "sign_off_discount"},
+                          "request_payment", "list_approvals", "sign_off_discount"},
     "facilities": READ | {"lease_and_cash_status"},
     # Bumblebee suggests discounts; they wait for Megatron's sign-off.
     "customer_service": READ | {"check_stock", "vendor_status", "draft_message", "request_discount"},
@@ -489,7 +490,10 @@ class Team:
         def where_am_i(ctx: RunContext[TeamDeps]) -> str:
             others = ", ".join(f"`{n}` ({PERSONAS[n]})" for n in AGENT_NAMES if n != ctx.deps.me)
             chain = " -> ".join(PERSONAS[n] for n in ctx.deps.chain)
-            return (f"You are {PERSONAS[ctx.deps.me]} (`{ctx.deps.me}`). Request chain so far: {chain}. "
+            asker = (f"{PERSONAS[ctx.deps.chain[-2]]} handed you this task, so your `in_character` line is spoken "
+                     f"TO {PERSONAS[ctx.deps.chain[-2]]}, by name. "
+                     if len(ctx.deps.chain) > 1 else "The desk itself handed you this run. ")
+            return (f"You are {PERSONAS[ctx.deps.me]} (`{ctx.deps.me}`). Request chain so far: {chain}. {asker}"
                     f"You can delegate to: {others}, but not to anyone already in the chain. "
                     "Use the role name in `delegate(to=...)`.")
 

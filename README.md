@@ -7,7 +7,7 @@ A multi-agent operations desk for Campus Customs. The team is five Pydantic AI a
 | `boss` | **Optimus Prime** | Reads the whole desk, routes tickets, settles arguments, steps in himself when needed. Opens every run by saying "Autobots, roll out!" out loud |
 | `inventory` | **Ratchet** | Stock by SKU/size, restock vendors, lead times, purchase-order drafts |
 | `accounting` | **Megatron** | Cash, invoices, margins, payment and discount requests. Pushes back on Prime when the shop is running out of money |
-| `facilities` | **Ironhide** | The Chapel Street lease, the landlord, rent |
+| `facilities` | **Ironhide** | Takes every landlord/lease notice, checks it against the lease, then has to get Megatron to queue the rent. They hate each other, and it shows |
 | `customer_service` | **Bumblebee** | Every message to customers, clubs and the landlord. Talks only in famous quotes, and messages are drafts only |
 
 Any agent can delegate to any other (`delegate(to, task)`). Loop guards stop cycles: no delegating to anyone already in the chain, at most 4 deep, and 120 model requests per run.
@@ -104,7 +104,7 @@ Use step 1's `cp` command, the **⟲ Reset DB** button on the board, or `POST /a
 | `list_approvals` | Optimus, Megatron | R `approvals`, `cash_accounts` | The approval queue, cash now, and cash if everything pending is approved |
 | `update_ticket` | Optimus | **W** `tickets` | Sets the status and appends a dated note; won't mark a ticket resolved with an approval pending |
 | `request_payment` | Optimus, Megatron | R `invoices`/`leases`, `cash_accounts`; **W** `approvals` | Queues an invoice or rent payment for a human. Amount comes from the DB; refuses if cash would go negative |
-| `request_discount` | Optimus, Megatron, Bumblebee | R `pricing`; **W** `approvals` | Suggests a bulk price; refuses at or below unit cost. Anyone but Megatron → waits for his sign-off, then the human |
+| `request_discount` | Optimus, Bumblebee | R `pricing`; **W** `approvals` | Suggests a bulk price; refuses at or below unit cost. Waits for Megatron's sign-off, then the human |
 | `draft_purchase_order` | Optimus, Ratchet | R `vendors`, `pricing`, `inventory`, `invoices`; **W** `approvals` | Queues a restock PO (cost + ETA); flagged while the vendor has an open invoice |
 | `draft_message` | Optimus, Bumblebee | **W** `drafts` | Saves a message as a draft on the board. **Never sent** |
 | `hold_stock` | Optimus, Ratchet | **W** `stock_holds` | Reserves units for a ticket, pending dispatch. `check_stock` then shows them as held |

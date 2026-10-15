@@ -240,7 +240,7 @@ Built with **Pydantic AI** in `backend/agents.py`, on the Portkey-served `gpt-5.
 | `boss` | **Optimus Prime**: calm, fair, kind when news is bad, leads from the front | Reads the whole desk, routes each ticket to only the specialists it needs, settles disagreements, sets ticket status, and steps in with his own tools when a specialist is blocked | `DeskReport` (per-ticket `TicketResolution`, cash picture, `disagreements_settled`, `message_to_the_team`) | `boss.md` |
 | `inventory` | **Ratchet**: the gruff stockroom medic | Stock by SKU/size, restock vendor and lead time, POs (only once the vendor can ship), stock holds | `AgentReport` | `inventory.md` |
 | `accounting` | **Megatron**: a Decepticon guarding the treasury | Cash, invoices, margins. Queues payments, confirms they're paid, signs off discounts, and **pushes back on Prime** when cash runs thin, with exact figures | `AgentReport` (with `pushback`) | `accounting.md` |
-| `facilities` | **Ironhide**: guardian of the base | Lease disputes, wrong amounts or dates, building problems. Routine rent goes to Megatron | `AgentReport` | `facilities.md` |
+| `facilities` | **Ironhide**: guardian of the base, and Megatron's sworn enemy | Every landlord or lease notice comes to him first: he checks it against the lease, then has to go to Megatron to get the rent queued, and the two trade insults. Also handles lease disputes and building problems | `AgentReport` (with `pushback` aimed at Megatron) | `facilities.md` |
 | `customer_service` | **Bumblebee**: talks only in famous quotes | Every message to customers, clubs and the landlord (drafts only), with facts read out as radio-bulletin clips. Suggests backorder discounts | `AgentReport` | `customer_service.md` |
 
 **The agent loop.** `Team._loop` steps each agent with `agent.iter()`. Each step is: model request → model response (text and/or tool calls) → MCP or delegate tool calls → back to the model, until the agent returns its typed report. Every step is written to the audit trail as it happens.
@@ -252,8 +252,8 @@ Built with **Pydantic AI** in `backend/agents.py`, on the Portkey-served `gpt-5.
 | Ticket type | Crew | Notes |
 |---|---|---|
 | Customer order | Megatron → Ratchet → Bumblebee | Pay any blocking vendor invoice → stop for the human → confirm paid → restock → give a specific date: today + `lead_days` |
-| Rent notice | Megatron → Bumblebee | Megatron confirms the due date and queues the rent without paying it. Bumblebee tells the landlord it *will* be paid on time |
-| Bulk / discount request | Ratchet → Megatron → Bumblebee | Stock first. Megatron checks funds and pushes back if it can't be funded. Offer what's on hand with **10% off** as a thank-you for patience on the backorder. Bumblebee suggests it, then Megatron signs it off, then a human approves. Hold the on-hand units |
+| Rent notice | Ironhide → Megatron → Bumblebee | Ironhide acknowledges the notice and checks the lease, then goes to Megatron (combative, but the numbers stay exact). Megatron queues the rent without paying it. Bumblebee tells the landlord it *will* be paid on time |
+| Bulk / discount request | Ratchet → Megatron → Bumblebee | Stock first. Megatron checks funds and pushes back if it can't be funded. Offer what's on hand with **exactly 10% off** as a thank-you for patience on the backorder. Bumblebee suggests it, then Megatron signs it off, then a human approves. Megatron no longer has `request_discount`, so he can't set the price himself. Hold the on-hand units |
 | Follow-up | Whoever is needed | After a human decides the approvals, the ticket returns `in_progress`. Optimus confirms the result with a tool and resolves it |
 
 ## Agents, tools and tables
@@ -287,8 +287,8 @@ R = reads, **W** = writes. `approvals`, `drafts` and `stock_holds` are work-queu
 |---|---|---|---|
 | `boss` | **Optimus Prime**: leads, routes, and steps in when needed | `list_open_tickets`, `get_ticket`, `update_ticket`, `list_approvals`, `check_stock`, `vendor_status`, `lease_and_cash_status`, `request_payment`, `request_discount`, `draft_purchase_order`, `draft_message`, `hold_stock`, `delegate` | R every shop table except `payments`, plus `approvals`/`drafts`/`stock_holds`; **W** `tickets`, `approvals`, `drafts`, `stock_holds` |
 | `inventory` | **Ratchet**: stock, vendors, POs, holds | `get_ticket`, `check_stock`, `vendor_status`, `draft_purchase_order`, `hold_stock`, `delegate` | R `tickets`, `inventory`, `pricing`, `vendors`, `invoices`, `stock_holds`, `desk`; **W** `approvals` (POs), `stock_holds` |
-| `accounting` | **Megatron**: cash, invoices, margins, discount sign-off, and arguing with Prime | `get_ticket`, `check_stock`, `vendor_status`, `lease_and_cash_status`, `request_payment`, `request_discount`, `list_approvals`, `sign_off_discount`, `delegate` | R `tickets`, `inventory`, `pricing`, `vendors`, `invoices`, `leases`, `cash_accounts`, `desk`; **W** `approvals` (payments, discounts) |
-| `facilities` | **Ironhide**: lease and landlord | `get_ticket`, `lease_and_cash_status`, `delegate` | R `tickets`, `leases`, `cash_accounts`, `desk`; writes nothing (rent payments go through Megatron) |
+| `accounting` | **Megatron**: cash, invoices, margins, discount sign-off, and arguing with Prime and Ironhide | `get_ticket`, `check_stock`, `vendor_status`, `lease_and_cash_status`, `request_payment`, `list_approvals`, `sign_off_discount`, `delegate` | R `tickets`, `inventory`, `pricing`, `vendors`, `invoices`, `leases`, `cash_accounts`, `desk`; **W** `approvals` (payments, discounts) |
+| `facilities` | **Ironhide**: every landlord/lease notice, then a fight with Megatron | `get_ticket`, `lease_and_cash_status`, `delegate` | R `tickets`, `leases`, `cash_accounts`, `desk`; writes nothing (rent payments go through Megatron) |
 | `customer_service` | **Bumblebee**: every outgoing message, in quotes, and suggests backorder discounts | `get_ticket`, `check_stock`, `vendor_status`, `draft_message`, `request_discount`, `delegate` | R `tickets`, `inventory`, `pricing`, `vendors`, `invoices`, `desk`; **W** `drafts`, `approvals` (suggested discounts, which wait for Megatron) |
 
 No agent has `decide_approval`, so no agent can move money, write `payments`, or change `cash_accounts`, `invoices` or `leases`. Only a human can, through the backend.
@@ -309,6 +309,7 @@ Each rule is enforced in code, not just written in a prompt. Every prompt also r
 | No revenue modeling | Approving a discount moves no cash; no tool ever adds money to `cash_accounts` |
 | Never contact real vendors, customers or landlords | No sending tool exists; `draft_message` returns `sent: false` (see rule 2) |
 | One bill, one payment | `request_payment` de-duplicates by invoice/lease; `decide_approval` refuses anything already decided |
+| Every bill belongs to a ticket | `request_payment` and `draft_purchase_order` require a valid `ticket_id` and refuse a missing or unknown one |
 | Reset before a fresh run | `POST /api/reset`, or `POST /api/desk/run` (fresh by default), copies the original DB back |
 
 ### 1. No made-up information
@@ -397,7 +398,9 @@ All three tickets were **resolved** in the **final desk session**: 2026-10-14, 2
 
 Checking: **$3,400.00 → $152.00** (−$3,248.00 across 3 payments), matching `cash_accounts` in `data/campus_customs_new.db`.
 
-**`output/audit_trail.json` is append-only and holds every real run**, 16 in total: the 7 runs of the final session above; 8 earlier runs from the first live session (14:22–14:46 UTC, before the in-character voices, which also resolved all three tickets); and one first step of #101 (15:37 UTC) on a reset DB. Each run is identified by its `run_id`. The working DB holds the end state of the final session.
+**Revised #102 run (rent through Ironhide).** After the rent playbook changed, #102 was re-run on its own from a reset DB (2026-10-15, 00:36–00:39 UTC; runs `92061d6680e3`, `e7ee9a0de982`): Optimus ➜ **Ironhide** (acknowledged the notice, checked the lease) ➜ **Megatron** (queued the rent, unpaid) ➜ Bumblebee (landlord note). Ironhide and Megatron traded insults ("bucket-head" / "the Autobots' blunt instrument") with every figure exact, and Scott approved the rent. Because it ran standalone, its $3,400.00 → $1,000.00 isn't part of the desk's final cash figures. It also exposed a bug: the rent approval was saved with no `ticket_id`. `request_payment` and `draft_purchase_order` now require a valid ticket id.
+
+**`output/audit_trail.json` is append-only and holds every real run**, 18 in total: the 2 revised-#102 runs above; the 7 runs of the final session above; 8 earlier runs from the first live session (14:22–14:46 UTC, before the in-character voices, which also resolved all three tickets); and one first step of #101 (15:37 UTC) on a reset DB. Each run is identified by its `run_id`. The working DB holds the end state of the final session.
 
 **Where the final session differed from the plan** (details in `desk_tickets.html`):
 - On #103, Megatron set the discount himself at $54.00 (about 7% off) for 20 units, rather than Bumblebee suggesting the 10% house policy ($52.20) on the 8 on hand.

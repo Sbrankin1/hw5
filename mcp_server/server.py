@@ -357,14 +357,17 @@ def _queue(conn, *, ticket_id, kind, ref_id, amount, details, requested_by, stat
 
 
 @mcp.tool
-def request_payment(kind: str, ref_id: int, ticket_id: int | None, requested_by: str, reason: str) -> dict:
+def request_payment(kind: str, ref_id: int, ticket_id: int, requested_by: str, reason: str) -> dict:
     """Queue a payment for human approval. kind is "invoice" (ref_id = invoices.id) or
-    "rent" (ref_id = leases.id). The amount is read from the database, never typed in.
+    "rent" (ref_id = leases.id). ticket_id is required: the ticket this payment resolves.
+    The amount is read from the database, never typed in.
 
     Refuses if the item is already paid, or if paying it would take cash below zero.
     The reply shows cash left if every pending approval goes through, so conflicts are visible.
     """
     with closing(_connect()) as conn:
+        if conn.execute("SELECT 1 FROM tickets WHERE id = ?", (ticket_id,)).fetchone() is None:
+            return {"found": False, "error": f"No ticket with id={ticket_id!r}; pass the ticket this payment is for."}
         if kind == "invoice":
             inv = conn.execute("SELECT * FROM invoices WHERE id = ?", (ref_id,)).fetchone()
             if inv is None:
@@ -418,7 +421,7 @@ def request_discount(ticket_id: int, sku: str, qty: int, unit_price: float, requ
 
 
 @mcp.tool
-def draft_purchase_order(vendor_id: int, sku: str, size: str, qty: int, ticket_id: int | None,
+def draft_purchase_order(vendor_id: int, sku: str, size: str, qty: int, ticket_id: int,
                          requested_by: str, reason: str) -> dict:
     """Queue a restock purchase order for human approval. Cost = qty x the SKU's unit_cost.
 

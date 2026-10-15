@@ -244,7 +244,116 @@
       "runs": [
         "bf0f7ef69aaa",
         "40df6c145627"
-      ]
+      ],
+      "revised_run": {
+        "note": "Standalone re-run of #102 alone on a freshly reset DB (2026-10-15 00:36-00:39 UTC), after the rent playbook was changed to go through Ironhide. Not part of the desk's final cash figures.",
+        "runs": [
+          "92061d6680e3",
+          "e7ee9a0de982"
+        ],
+        "final_status": "resolved",
+        "outcome": "Ironhide acknowledged the landlord's notice and checked it against the lease ($2,400.00 due 2026-09-02), then went to Megatron (\"bucket-head\") to queue the rent. Megatron queued it unpaid (\"the Autobots' blunt instrument, your little fortress remains standing by the grace of my ledger\"). Bumblebee drafted the note promising payment on time, Scott approved the rent, and the lease rolled to 2026-10-02.",
+        "agents_on_ticket": [
+          "Optimus Prime",
+          "Ironhide",
+          "Megatron",
+          "Bumblebee"
+        ],
+        "agents_not_needed": [
+          "Ratchet"
+        ],
+        "agent_contributions": [
+          {
+            "agent": "boss",
+            "persona": "Optimus Prime",
+            "tools_used": [
+              "list_open_tickets",
+              "get_ticket",
+              "update_ticket",
+              "list_approvals",
+              "lease_and_cash_status"
+            ],
+            "delegated_to": [
+              "Ironhide"
+            ],
+            "said": [
+              "Autobots, the Chapel Street home is guarded. Approval #1 is the only gate: $2400.00 now waits for the human decision, leaving $1000.00 if released. Hold steady, and keep faith with the people we serve.",
+              "Autobots, ticket 102 is closed. The ledger shows $1000.00 in cash and no pending approvals. Hold steady; the remaining tickets await their own reckoning."
+            ],
+            "contribution": "The rent notice is resolved. Lease 1 now shows the next due date as 2026-10-02, and no approval remains pending. Landlord draft #1 remains filed for human handling. No further desk action is pending on ticket 102. The people we serve have a draft on the board, and the lease record has advanced beyond the earlier 2026-09-02 due date."
+          },
+          {
+            "agent": "facilities",
+            "persona": "Ironhide",
+            "tools_used": [
+              "get_ticket",
+              "lease_and_cash_status"
+            ],
+            "delegated_to": [
+              "Megatron",
+              "Bumblebee"
+            ],
+            "said": [
+              "Optimus Prime, I checked the landlord’s notice against the lease and put the rent in Megatron’s queue—approval required, not paid. The Decepticon got his numbers right for once, and Bumblebee has the landlord draft ready; the base stays first."
+            ],
+            "contribution": "Ticket 102’s notice says shop rent is due in 2 days, matching lease 1. Lease rent was queued for human approval under approval #1; it has not been paid. Bumblebee saved landlord draft #1 promising payment by the due date and stating the rent is going through approval."
+          },
+          {
+            "agent": "accounting",
+            "persona": "Megatron",
+            "tools_used": [
+              "list_approvals",
+              "lease_and_cash_status",
+              "request_payment",
+              "get_ticket"
+            ],
+            "delegated_to": [],
+            "said": [
+              "Ironhide, the Autobots’ blunt instrument, your little fortress remains standing by the grace of my ledger. Rent of $2,400.00 is queued under approval #1; $3,400.00 stands now and $1,000.00 would remain if the human approves. I have submitted it properly—now I must endure a fleshling’s approval before your roof is funded.",
+              "Bumblebee, the Chapel Street shop owes Elm City Properties exactly $2,400.00, due September 2, 2026. Approval #1 is already pending with the human; the payment remains unapproved, naturally forcing even Megatron to endure a fleshling’s delay."
+            ],
+            "contribution": "Confirmed lease 1 rent for the Chapel Street shop. The amount is $2,400.00 and the next due date is 2026-09-02. Rent approval #1 is pending human approval; no payment is recorded as completed."
+          },
+          {
+            "agent": "customer_service",
+            "persona": "Bumblebee",
+            "tools_used": [
+              "get_ticket",
+              "draft_message"
+            ],
+            "delegated_to": [
+              "Megatron"
+            ],
+            "said": [
+              "\"Ironhide, mission accomplished.\" [news headline] 📻 \"Draft one is on the board.\" [news bulletin] \"The rent will be paid on time.\" [news bulletin]"
+            ],
+            "contribution": "\"The rent is going through human approval.\" [news bulletin] \"It will be paid on time by the due date.\" [news bulletin]"
+          }
+        ],
+        "human_approvals": [
+          {
+            "approval_id": 1,
+            "kind": "rent",
+            "amount": 2400.0,
+            "requested_by": "Megatron",
+            "status": "approved",
+            "approved_by": "Scott",
+            "payment_id": 1,
+            "ticket_id": null
+          }
+        ],
+        "cash_change_in_that_run": -2400.0,
+        "drafts": [
+          {
+            "draft_id": 1,
+            "to": "Elm City Properties",
+            "subject": "Chapel Street shop rent — approval pending",
+            "body": "\"Elm City Properties, we have a situation.\" [Apollo 13]\n📻 \"This just in: Chapel Street shop rent is $2400.00.\" [news bulletin]\n\"The rent is going through human approval.\" [news bulletin]\n\"It will be paid on time, by the due date: 2026-09-02.\" [news bulletin]\n\"Don't worry; be happy.\" [Bobby McFerrin]\n— Bumblebee, Campus Customs",
+            "sent": false
+          }
+        ],
+        "issue_found": "The rent approval was saved with ticket_id null; request_payment and draft_purchase_order now require a valid ticket id."
+      }
     },
     {
       "ticket_id": 103,
