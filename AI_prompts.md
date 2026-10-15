@@ -433,3 +433,9 @@
 - *Bumblebee used a song lyric in a report.*
 
 *While capturing the stalemate, a bug turned up: in the light theme its text had become dark on dark. It was fixed by giving the full-screen moments their own white text.*
+
+### Prompt 5
+> https://github.com/Sbrankin1/hw5.git
+> I accidentally checked the readme box
+
+*Why this follow-up was needed: it gave the repository URL. The README box turned out not to have created a commit (the remote had no refs), so nothing needed merging. Both commits were pushed with Apple's `/usr/bin/git`, because the `git` first on the PATH (`~/.local/bin/git`) has no HTTPS helper. The URL was then written to `output/github_url.txt`.*
