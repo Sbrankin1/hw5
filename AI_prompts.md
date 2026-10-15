@@ -303,6 +303,11 @@
 *Why this follow-up was needed: two runs (102 and 103) were in the run list that the vibe coder hadn't started. The user had started them from the board. Checking those runs confirmed 103 produced Megatron's real −$112 pushback, so the stalemate screen could be tested on a real run.*
 
 ### Prompt 7
+> Launch the dashboard
+
+*Why this follow-up was needed: the user's own terminal commands kept failing with "no such file or directory" (the terminal wasn't in the Homework 5 folder). So the working DB was reset and the backend and board were started from the app; the board showed all three tickets open and checking at $3,400.00.*
+
+### Prompt 8
 > the images have not yet changed to reflect the new images you got from the wallpaper site
 
 *Why this follow-up was needed: nothing had been downloaded yet, because downloads need explicit approval. The user chose to have the vibe coder find the images, and approved each file:*
@@ -439,3 +444,9 @@
 > I accidentally checked the readme box
 
 *Why this follow-up was needed: it gave the repository URL. The README box turned out not to have created a commit (the remote had no refs), so nothing needed merging. Both commits were pushed with Apple's `/usr/bin/git`, because the `git` first on the PATH (`~/.local/bin/git`) has no HTTPS helper. The URL was then written to `output/github_url.txt`.*
+
+### Prompt 6
+> so you think that it is looking good?
+
+*Why this follow-up was needed: the user asked for an honest final assessment before handing it in. A last check found one prompt ("Launch the dashboard", Problem 8) that had never been logged. It was added under Problem 8, and the repository was updated.*
+
